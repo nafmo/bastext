@@ -1,0 +1,330 @@
+
+
+
+BASTEXT(1)                                             BASTEXT(1)
+
+
+NAME
+       bastext - convert Commodore BASIC to text
+
+SYNOPSIS
+       bastext -i [-t] [-a] [-s] [-d filename] filename(s)
+       bastext -o [-t] [-2|-3|-5|-7|-1] filename(s)
+       bastext -h
+
+DESCRIPTION
+       bastext  is  a  program  that  is  used to convert between
+       binary (tokenized) BASIC files from the Commodore C64  and
+       C128  to  a  clean  ASCII  text  format  that is human and
+       machine readable, as well as transportable via  electronic
+       mail.   This  program  is  designed  to be compatible with
+       tok64, while extending the  support  for  Commodore  BASIC
+       extensions and dialects.
+
+       The  following Commodore BASIC versions and extensions are
+       supported by bastext:
+
+              Commodore BASIC 2.0
+              Commodore BASIC 7.0
+              Software Unlimited's Graphics52 for Commodore 64
+              Riska BV's The Final Cartridge III for Commodore 64
+              Rick Simon's BASIC 7.1 for Commodore 128
+
+       bastext  tries  to  autodetect the Commodore BASIC dialect
+       used in the file it is processing.  At the moment, this is
+       done  by checking the starting address of the file.  These
+       starting  addresses  are   recognized,   and   interpreted
+       (addresses written in hexadecimal):
+
+       0401   VIC-20  BASIC  2.0 or Commodore 64 Graphics52 BASIC
+              extension.  Since Graphics52 is the super-set,  the
+              file will be interpreted as such.
+
+       0801   Commodore  64  BASIC  2.0 or Commodore 64 The Final
+              Cartridge III BASIC extension.  Since TFC3  is  the
+              super-set, the file will be interpreted as such.
+
+       132D   Commodore  128  BASIC  7.1 extension by Rick Simon.
+              This file is a combined file, with both  the  BASIC
+              7.1  extension  binary, and the BASIC source in one
+              file (saved with BASIC 7.1's ESAVE  command).   The
+              preamble  will  be  ignored,  and  the file will be
+              interpreted as BASIC 7.1.
+
+       1C01   Commodore 128 BASIC 7.0 or Commodore 128 BASIC  7.1
+              extension  by  Rick  Simon.  Since BASIC 7.1 is the
+              super-set, the file will be interpreted as such.
+
+       4001   Commodore 128 BASIC 7.0 saved  with  graphics  mode
+              enabled.
+
+
+
+
+Softwolves Software         1998-01-18                          1
+
+
+
+
+
+BASTEXT(1)                                             BASTEXT(1)
+
+
+       The  text files created by this program are supposed to be
+       compatible with those of tok64, meaning that the files  it
+       creates should be possible to interpret with this one, and
+       the files this  program  creates  should  be  possible  to
+       interpret  with it.  However, an extra header, in front of
+       tok64´s start tok64 header is added, start bastext,  which
+       contains the starting address of the original binary file.
+       This is to make the autodetection possible for  the  text-
+       to-binary  direction.  The header is not included when the
+       program starts at 0801 (see also BUGS) or 1C01.  For  Com­
+       modore  128 BASIC programs, the header is changed to start
+       tok128, since tok64 only supports C64 programs, this  will
+       make it skip those programs.
+
+       When bastext interprets text representations of files back
+       into binary mode, it will use the start address  as  saved
+       in the start bastext header, to autodetect the file format
+       in the same way as in binary-to-text.  If no  such  header
+       exists  (e.g  if the file was created with tok64), bastext
+       will assume that  the  program's  start  address  is  0801
+       (standard  for Commodore 64), and that it should interpret
+       it as Commodore 128 BASIC 7.0, as this is a  super-set  of
+       BASIC  2.0.   This  should  make bastext able to interpret
+       most text files without any big problems.   If  autodetec­
+       tion  in  this  mode does not work, use one of the "force"
+       parameters described below.
+
+OPTIONS
+       One of the three mode selectors must be given:
+
+       -i     Set input mode (converting  from  binary  Commodore
+              tokenized BASIC to text).
+
+       -o     Set  output  mode  (converting  from text to binary
+              Commodore tokenized BASIC).
+
+       -h     Shows a brief help screen, with an overview of  the
+              available options.
+
+   GENERAL MODIFIERS
+       These  general  modifiers  (works in both input and output
+       modes) are available:
+
+       -t     Enable T64 (Commodore  64  emulator  tape  archive)
+              mode.   When in input mode, this means that instead
+              of the specified file names being binary  Commodore
+              BASIC files, they are T64 archives.  When in output
+              mode, this means that instead of writing the binary
+              Commodore  BASIC  files  to  files  in  the current
+              directory, they will be written to  a  T64  archive
+              named bastext.t64 in the current directory.  If the
+              archive already exists, it  will  be  appended  to.
+              The default directory size for the bastext.t64 file
+              is 30 entries.  If you try to add more files to it,
+
+
+
+Softwolves Software         1998-01-18                          2
+
+
+
+
+
+BASTEXT(1)                                             BASTEXT(1)
+
+
+              the  program will abort with an error message.  The
+              default directory size is controlled in  the  t64.h
+              file.
+
+   INPUT MODE MODIFIERS
+       These modifiers are available only when in input mode:
+
+       -a     Convert all input files, not only those that have a
+              starting address.
+
+       -s     Maintain strict  compatibility  with  tok64.   This
+              means  that  bastext´s  "extended" escape codes for
+              charactes 92  (British  pound),  95  (left  arrow),
+              160-192  (shift  space  to shift asterisk), 219-221
+              (shift plus, commodore minus and shift minus),  and
+              223 (commodore asterisk), will be printed as three-
+              digit numeric escape codes, not as textual escapes.
+              The "strict" mode will not, however, undo the prob­
+              lems with tok64's "uppercase in quoted strings"-bug
+              (see under BUGS).
+
+       -d filename
+              Selects  the  filename  to write the output to.  If
+              the filename is not given, or is given as "-",  the
+              listings  will  be  output  on  the standard output
+              device (normally the console).
+
+   OUTPUT MODE MODIFIERS
+       These modifiers are available only when in output mode:
+
+       -2     Force Commodore BASIC  2.0  interpretation  of  all
+              programs.
+
+       -3     Force  Commodore  64  The Final Cartridge III BASIC
+              extension interpretation  of  all  programs.   (See
+              also BUGS).
+
+       -5     Force   Commodore  64  Graphics52  BASIC  extension
+              interpretation of all programs.
+
+       -7     Force Commodore 128 BASIC 7.0 interpretation of all
+              programs.
+
+       -1     Force Commodore 128 BASIC 7.1 extension interpreta­
+              tion of all programs.
+
+       Please note that the MS-DOS and OS/2  versions  (EMX  com­
+       piled) uses / (slash) as parameter character.
+
+EXAMPLES
+       bastext -i sample.prg
+              Converts sample.prg to text, and displays it on the
+              standard output.
+
+
+
+
+Softwolves Software         1998-01-18                          3
+
+
+
+
+
+BASTEXT(1)                                             BASTEXT(1)
+
+
+       bastext -i -s -d programs.txt *.prg
+              Converts all Commodore BASIC binary  files  with  a
+              .prg  extension to text, writing it to programs.txt
+              in the current directory, while  maintaining  tok64
+              compatibility.
+
+       bastext -it *.t64 | more
+              Converts  all files in all T64 archives (with file­
+              name suffix .t64) in  the  current  directory  into
+              listings, displaying them one page at a time.
+
+       bastext -o7 programs.txt
+              Converts all programs in the programs.txt text file
+              into Commodore BASIC 7.0 programs.
+
+SEE ALSO
+       http://ip64.home.ml.org/
+       http://ourworld.compuserve.com/homepages/pcgeek/proj64.htm
+
+FILES
+       ./bastext.t64
+
+DISTRIBUTED FILES
+       These source files comes with the bastext distribution:
+       COPYING
+              The GNU Public License.
+       Makefile
+              File used by make(1) to automate compilation.
+       Makefile.os2
+              Makefile for DOS/OS2 version (using EMX).
+       bastext.1
+              Source code for manual page/documentation.
+       bastext.doc
+              Manual page/documentation.
+       dtokeniz.c
+              Routines for detokenization.
+       inmode.c
+              Routines used for the input mode.
+       inmode.h
+              Header file for inmode.c.
+       main.c Start-up routines.
+       outmode.c
+              Routines used for the output mode.
+       outmode.h
+              Header file for outmode.c.
+       select.c
+              Routines for BASIC dialect autodetection.
+       select.h
+              Header file for select.c.
+       t64.c  Routines used with T64 files.
+       t64.h  Header  file for t64.c, including definition of T64
+              file format.
+       tidy.c Utility program used to create bastext.doc.
+
+
+
+
+Softwolves Software         1998-01-18                          4
+
+
+
+
+
+BASTEXT(1)                                             BASTEXT(1)
+
+
+       tokenize.c
+              Routines for tokenization.
+       tokenize.h
+              Header file for tokenize.c and dtokeniz.c.
+       tokens.c
+              Tokens and PETSCII tables.
+       tokens.h
+              Header file for tokens.c.
+       version.h
+              Header file contaning program name and version.
+
+       These binary files comes with the bastext distribution:
+       linux/bastext.i86
+              Binary version for Linux/i86.
+       linux/bastext.sun
+              Binary version for Linux/Sparc.
+       sun/bastext.sun
+              Binary version for SunOS/Sparc.
+       dos/bastext.exe
+              Binary version for DOS and  OS/2  (EMX).   Requires
+              the EMX/RSX runtime libraries.
+
+BUGS
+       TFC3  BASIC files that are converted to text will not have
+       a start bastext header, so when converted back to  binary,
+       they  will be interpreted as Commodore 128 BASIC 7.0.  You
+       have to use the -3 option (force  TFC3)  to  convert  TFC3
+       BASIC text files back to binary.
+
+       tok64  seems  to  parse  uppercase  characters  in  quoted
+       strings incorrectly.  It converts them into characters  in
+       the  range  of  97-122,  whereas a Commodore computer (and
+       bastext) usually uses the "shadow" range of 193-208.  This
+       will  not look any different when used on a Commodore com­
+       puter, but it will make the  binaries  differ,  and  could
+       make a difference if the program needs the correct PETSCII
+       values.  The problem will appear when you convert the pro­
+       gram  in  one direction with bastext and in the other with
+       tok64, not when using the same program in both directions.
+
+       bastext  does not yet support the "bare" format that tok64
+       normally outputs (without the start tok64 header).
+
+VERSION INFORMATION
+       This documentation covers version 1.0 of bastext.
+
+AUTHOR
+       BASTEXT was written by Peter Karlsson.  If you  have  bug-
+       reports or questions, mail them to pk@abc.se.
+
+       A Softwolves Software (tm) Release in 1998.
+
+       This program is released under the GNU Public License.
+
+
+
+
+Softwolves Software         1998-01-18                          5
+
+

@@ -1,0 +1,420 @@
+.TH BASTEXT 1 1998-01-18 "Softwolves Software" ""
+.SH NAME
+bastext \- convert Commodore BASIC to text
+.SH SYNOPSIS
+.PD 0
+.B bastext
+\-i [\-t] [\-a] [\-s] [\-d filename]
+filename(s)
+.PP
+.B bastext
+\-o
+[\-t] [\-2|\-3|\-5|\-7|\-1]
+filename(s)
+.PP
+.B bastext
+\-h
+.PD
+.SH DESCRIPTION
+.B bastext
+is a program that is used to convert between binary (tokenized)
+BASIC files from the Commodore C64 and C128 to a clean ASCII text
+format that is human and machine readable, as well as transportable
+via electronic mail.
+This program is designed to be compatible with
+.BR tok64 ,
+while extending the support for Commodore BASIC extensions and
+dialects.
+.PP
+The following Commodore BASIC versions and extensions are supported
+by
+.BR bastext :
+.RS
+.PP
+.I Commodore BASIC 2.0
+.PD 0
+.PP
+.I Commodore BASIC 7.0
+.PP
+.I Software Unlimited's Graphics52 for Commodore 64
+.PP
+.I Riska BV's The Final Cartridge III for Commodore 64
+.PP
+.I Rick Simon's BASIC 7.1 for Commodore 128
+.RE
+.PD
+.PP
+.B bastext
+tries to autodetect the Commodore BASIC dialect used in the file
+it is processing.
+At the moment, this is done by checking the starting address of the
+file.
+These starting addresses are recognized, and interpreted (addresses
+written in hexadecimal):
+.TP
+0401
+.I VIC-20 BASIC 2.0
+or
+.IR "Commodore 64 Graphics52 BASIC extension" .
+Since Graphics52 is the super-set, the file will be interpreted
+as such.
+.TP
+0801
+.I Commodore 64 BASIC 2.0
+or
+.IR "Commodore 64 The Final Cartridge III BASIC extension" .
+Since TFC3 is the super-set, the file will be interpreted
+as such.
+.TP
+132D
+.IR "Commodore 128 BASIC 7.1 extension by Rick Simon" .
+This file is a combined file, with both the BASIC 7.1
+extension binary, and the BASIC source in one file (saved
+with BASIC 7.1's
+.B ESAVE
+command).
+The preamble will be ignored, and the file will be
+interpreted as BASIC 7.1.
+.TP
+1C01
+.I Commodore 128 BASIC 7.0
+or
+.IR "Commodore 128 BASIC 7.1 extension by Rick Simon" .
+Since BASIC 7.1 is the super-set, the file will be
+interpreted as such.
+.TP
+4001
+.I Commodore 128 BASIC 7.0
+saved with graphics mode enabled.
+.PP
+The text files created by this program are supposed to be
+compatible with those of
+.BR tok64 ,
+meaning that the files it creates should be possible to
+interpret with this one, and the files this program creates
+should be possible to interpret with it.
+However, an extra header, in front of
+.BR tok64 \'s
+.I start tok64
+header is added,
+.IR "start bastext" ,
+which contains the starting address of the original binary
+file.
+This is to make the autodetection possible for the text-to-binary
+direction.
+The header is not included when the program starts at 0801
+(see also
+.BR BUGS )
+or 1C01.
+For Commodore 128 BASIC programs, the header is changed to
+.IR "start tok128" ,
+since
+.B tok64
+only supports C64 programs, this will make it skip those
+programs.
+.PP
+When
+.B bastext
+interprets text representations of files back into binary mode,
+it will use the start address as saved in the
+.I start bastext
+header, to autodetect the file format in the same way as in
+binary-to-text.
+If no such header exists (e.g if the file was created with
+.BR tok64 ),
+.B bastext
+will assume that the program's start address is 0801
+(standard for Commodore 64), and that it should interpret it as
+Commodore 128 BASIC 7.0, as this is a super-set of BASIC 2.0.
+This should make
+.B bastext
+able to interpret most text files without any big problems.
+If autodetection in this mode does not work, use one of the
+"force" parameters described below.
+.SH OPTIONS
+One of the three mode selectors must be given:
+.TP
+.I \-i
+Set input mode (converting from binary Commodore tokenized BASIC to
+text).
+.TP
+.I \-o
+Set output mode (converting from text to binary Commodore tokenized
+BASIC).
+.TP
+.I \-h
+Shows a brief help screen, with an overview of the available options.
+.SS "GENERAL MODIFIERS"
+.PP
+These general modifiers (works in both input and output modes)
+are available:
+.TP
+.I \-t
+Enable T64 (Commodore 64 emulator tape archive) mode.
+When in input mode, this means that instead of the specified file
+names being binary Commodore BASIC files, they are T64 archives.
+When in output mode, this means that instead of writing the
+binary Commodore BASIC files to files in the current directory,
+they will be written to a T64 archive named
+.B bastext.t64
+in the current directory.
+If the archive already exists, it will be appended to.
+The default directory size for the
+.B bastext.t64
+file is 30 entries.
+If you try to add more files to it, the program will abort with
+an error message.
+The default directory size is controlled in the
+.I t64.h
+file.
+.SS "INPUT MODE MODIFIERS"
+.PP
+These modifiers are available only when in input mode:
+.TP
+.I \-a
+Convert all input files, not only those that have a \"recognized\"
+starting address.
+.TP
+.I \-s
+Maintain strict compatibility with
+.BR tok64 .
+This means that
+.BR bastext \'s
+"extended" escape codes for charactes 92 (British pound),
+95 (left arrow), 160\-192 (shift space to shift asterisk),
+219\-221 (shift plus, commodore minus and shift minus), and 223
+(commodore asterisk), will be printed as three-digit numeric
+escape codes, not as textual escapes.
+The "strict" mode will not, however, undo the problems with
+.BR tok64 's
+"uppercase in quoted strings"-bug (see under
+.BR BUGS ).
+.TP
+.I \-d filename
+Selects the filename to write the output to.
+If the filename is not given, or is given as "-", the listings
+will be output on the standard output device (normally the
+console).
+.SS "OUTPUT MODE MODIFIERS"
+.PP
+These modifiers are available only when in output mode:
+.TP
+.I \-2
+Force
+.I Commodore BASIC 2.0
+interpretation of
+.I all
+programs.
+.TP
+.I \-3
+Force
+.I Commodore 64 The Final Cartridge III BASIC extension
+interpretation of
+.I all
+programs.
+(See also
+.BR BUGS ).
+.TP
+.I \-5
+Force
+.I Commodore 64 Graphics52 BASIC extension
+interpretation of
+.I all
+programs.
+.TP
+.I \-7
+Force
+.I Commodore 128 BASIC 7.0
+interpretation of
+.I all
+programs.
+.TP
+.I \-1
+Force
+.I Commodore 128 BASIC 7.1 extension
+interpretation of
+.I all
+programs.
+.PP
+Please note that the MS-DOS and OS/2 versions (EMX compiled)
+uses
+.B /
+(slash) as parameter character.
+.SH EXAMPLES
+.TP
+.B bastext \-i sample.prg
+Converts
+.I sample.prg
+to text, and displays it on the standard output.
+.TP
+.B bastext \-i \-s \-d programs.txt *.prg
+Converts all Commodore BASIC binary files with a
+.I .prg
+extension to text, writing it to
+.I programs.txt
+in the current directory, while maintaining
+.B tok64
+compatibility.
+.TP
+.B bastext \-it *.t64 | more
+Converts all files in all T64 archives (with filename suffix
+.IR .t64 )
+in the current directory into listings, displaying them
+one page at a time.
+.TP
+.B bastext \-o7 programs.txt
+Converts all programs in the
+.I programs.txt
+text file into Commodore BASIC 7.0 programs.
+.SH "SEE ALSO"
+.PD 0
+.PP
+.I http://ip64.home.ml.org/
+.PP
+.I http://ourworld.compuserve.com/homepages/pcgeek/proj64.htm
+.PD
+.SH FILES
+.I ./bastext.t64
+.SH "DISTRIBUTED FILES"
+These source files comes with the
+.B bastext
+distribution:
+.PD 0
+.TP
+.I COPYING
+The GNU Public License.
+.TP
+.I Makefile
+File used by
+.BR make (1)
+to automate compilation.
+.TP
+.I Makefile.os2
+Makefile for DOS/OS2 version (using EMX).
+.TP
+.I bastext.1
+Source code for manual page/documentation.
+.TP
+.I bastext.doc
+Manual page/documentation.
+.TP
+.I dtokeniz.c
+Routines for detokenization.
+.TP
+.I inmode.c
+Routines used for the input mode.
+.TP
+.I inmode.h
+Header file for
+.IR inmode.c .
+.TP
+.I main.c
+Start-up routines.
+.TP
+.I outmode.c
+Routines used for the output mode.
+.TP
+.I outmode.h
+Header file for
+.IR outmode.c .
+.TP
+.I select.c
+Routines for BASIC dialect autodetection.
+.TP
+.I select.h
+Header file for
+.IR select.c .
+.TP
+.I t64.c
+Routines used with T64 files.
+.TP
+.I t64.h
+Header file for
+.IR t64.c ,
+including definition of T64 file format.
+.TP
+.I tidy.c
+Utility program used to create
+.IR bastext.doc .
+.TP
+.I tokenize.c
+Routines for tokenization.
+.TP
+.I tokenize.h
+Header file for
+.I tokenize.c
+and
+.IR dtokeniz.c .
+.TP
+.I tokens.c
+Tokens and PETSCII tables.
+.TP
+.I tokens.h
+Header file for
+.IR tokens.c .
+.TP
+.I version.h
+Header file contaning program name and version.
+.PD
+.PP
+These binary files comes with the
+.B bastext
+distribution:
+.PD 0
+.TP
+.I linux/bastext.i86
+Binary version for Linux/i86.
+.TP
+.I linux/bastext.sun
+Binary version for Linux/Sparc.
+.TP
+.I sun/bastext.sun
+Binary version for SunOS/Sparc.
+.TP
+.I dos/bastext.exe
+Binary version for DOS and OS/2 (EMX).
+Requires the EMX/RSX runtime libraries.
+.PD
+.SH BUGS
+TFC3 BASIC files that are converted to text will not have a
+.I start bastext
+header, so when converted back to binary, they will be
+interpreted as Commodore 128 BASIC 7.0.
+You have to use the
+.I \-3
+option (force TFC3) to convert TFC3 BASIC text files back to
+binary.
+.PP
+.B tok64
+seems to parse uppercase characters in quoted strings
+incorrectly.
+It converts them into characters in the range of 97-122,
+whereas a Commodore computer (and
+.BR bastext )
+usually uses the "shadow" range of 193-208.
+This will not look any different when used on a Commodore
+computer, but it will make the binaries differ, and could
+make a difference if the program needs the correct PETSCII
+values.
+The problem will appear when you convert the program in
+one direction with
+.B bastext
+and in the other with
+.BR tok64 ,
+not when using the same program in both directions.
+.PP
+.B bastext
+does not yet support the "bare" format that tok64 normally
+outputs (without the
+.I start tok64
+header).
+.SH VERSION\ INFORMATION
+This documentation covers version 1.0 of
+.BR bastext .
+.SH AUTHOR
+BASTEXT was written by Peter Karlsson.
+If you have bug-reports or questions, mail them to pk@abc.se.
+.PP
+A Softwolves Software (tm) Release in 1998.
+.PP
+This program is released under the GNU Public License.
