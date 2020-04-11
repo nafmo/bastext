@@ -231,7 +231,7 @@ int tokenize(const char *input_p, char *output_p, int *length_p, basic_t mode)
 						inputleft -= tokenlen;
 					} /* if */
 				} /* for */
-skipover:
+			skipover: ;
 			} /* if */
 
 			if (!match && (Basic7 == mode || Basic71 == mode ||

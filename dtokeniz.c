@@ -5,7 +5,7 @@
 
 #include <string.h>
 #include <stdio.h>
-
+#include <ctype.h>
 #include "tokenize.h"
 #include "tokens.h"
 
@@ -37,7 +37,7 @@ int detokenize(const char *input_p, char *output_p, basic_t mode, int strict)
 	char numeric[4];			/* threedigit numeric escape for strict tok64
 								   compatibility */
 
-	ch_p = input_p;
+	ch_p = (const unsigned char*) input_p;
 
 	/* First two bytes is the line number as (low,high) */
 	linenumber = (*ch_p) | (*(ch_p + 1)) << 8;

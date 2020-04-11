@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 #include <string.h>
-
+#include <stdlib.h>
 #include "inmode.h"
 #include "tokenize.h"
 #include "version.h"
@@ -152,7 +152,7 @@ void t642txt(const char *infile, FILE *output, int allfiles, int strict)
 void inconvert(FILE *input, FILE *output, const char *title, int adr,
                int allfiles, int strict)
 {
-	int		ch, nextadr;
+	int		nextadr;
 	char	buf[256], text[512];
 	basic_t	mode;
 

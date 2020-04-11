@@ -5,11 +5,12 @@
 
 #include <stdio.h>
 #include <string.h>
-
+#include <stdlib.h>
 #include "outmode.h"
 #include "tokenize.h"
 #include "version.h"
 #include "t64.h"
+#include "select.h"
 
 #define FALSE 0
 #define TRUE 1
@@ -61,7 +62,7 @@ void txt2bas(const char *infile, basic_t force, int t64mode)
 			/* Create standard header */
 			memset(&header, 0, sizeof(header));
 			strcpy(header.description, "C64 tape archive " PROGNAME "\x1a");
-			strncpy(header.title, "CREATED BY BASTEXT      ", 24);
+			strncpy(header.title, "CREATED BY BASTEXT     ", 24);
 			header.version[0]  = 0x00;					/* low */
 			header.version[1]  = 0x01;					/* high */
 			header.maxfiles[0] = STD_DIRSIZE & 0xFF;	/* low */

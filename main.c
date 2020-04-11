@@ -2,7 +2,8 @@
  * - main routines for bastext
  * $Id$
  */
-
+#include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 #ifdef __EMX__
 # include <getopt.h>
@@ -182,6 +183,9 @@ int main(int argc, char *argv[])
 			case Out:
 				txt2bas(argv[i], force, t64mode);
 				break;
+
+		case None:
+		  break;
 		}
 	}
 
