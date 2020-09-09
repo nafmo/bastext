@@ -1,17 +1,18 @@
 BasText - convert Commodore BASIC to text
-Copyright © 1997-1999 peter Karlsson.
+==========================================
+Copyright 1997-1999 peter Karlsson.
 A Softwolves Software Release in 1999
 
 http://www.softwolves.pp.se/wolves/
 
-
 LICENSE
+--------
 
 This software is distributed under the GNU General Public License version
 2, as can be found in the accompanying file COPYING.
 
-
 USEAGE
+-------
 
 BasText is a program that is used to convert between binary (tokenized)
 BASIC files from the Commodore C64 and C128 to a clean ASCII text format
@@ -151,6 +152,7 @@ Please note that the MS-DOS and OS/2 versions (EMX compiled) uses / (slash)
 as parameter character.
 
 EXAMPLES
+---------
 
 bastext -i sample.prg
 
@@ -172,20 +174,18 @@ bastext -o7 programs.txt
 Converts all programs in the programs.txt text file into Commodore BASIC 7.0
 programs.
 
-
 HISTORY
+--------
 
 * v1.0 - 1998-01-18
   Initial public release.
 
-
 INCLUDED FILES
+---------------
 
-COPYING        The GNU Public License.
 Makefile       File used by make(1) to automate compilation.
-Makefile.os2   Makefile for DOS/OS2 version (using EMX).
 bastext.1      Source code for manual page.
-bastext.doc    This documentation.
+README.md      This documentation.
 dtokeniz.c     Routines for detokenization.
 inmode.c       Routines used for the input mode.
 inmode.h       Header file for inmode.c.
@@ -204,8 +204,8 @@ tokens.c       Tokens and PETSCII tables.
 tokens.h       Header file for tokens.c.
 version.h      Header file contaning program name and version.
 
-
 KNOWN BUGS
+-----------
 
 tok64 seems to parse uppercase characters in quoted strings incorrectly. It
 converts them into characters in the range of 97-122, whereas a Commodore
@@ -219,10 +219,10 @@ the same program in both directions.
 BasText does not yet support the "bare" format that tok64 normally outputs
 (without the start tok64 header).
 
-
 CONTACT
+--------
 
-The author, Peter Karlsson, can be contacted via netmail at 2:206/221.0, or
+The author, Peter Karlsson, can be contacted
 via Internet e-mail at peter@softwolves.pp.se. Information about this
 program is available on the world wide web at
 http://www.softwolves.pp.se/wolves/
