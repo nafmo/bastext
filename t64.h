@@ -1,7 +1,3 @@
-/* t64.h
- * $Id$
- */
-
 #ifndef __T64_H
 #define __T64_H
 
@@ -11,7 +7,7 @@
  * is little-endian).
  */
 
-#pragma pack(1)
+#pragma pack(push,1)
 
 /* Default number of entries */
 #define STD_DIRSIZE 30
@@ -41,6 +37,8 @@ typedef struct t64record_s {
 	unsigned char	reserved2[4];
 	char			filename[16];		/* Filename (PETSCII), space padded */
 } t64record_t;
+
+#pragma pack(pop)
 
 /* T64 file layout:
  * 0       t64header_t
