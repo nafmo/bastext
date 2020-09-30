@@ -1,6 +1,5 @@
 /* tokenize.c
  * - routines to tokenize C64/C128 BASIC
- * $Id$
  */
 
 #include <string.h>

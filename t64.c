@@ -1,6 +1,5 @@
 /* t64.c
  * - functions that operates on the T64 files
- * $Id$
  */
 
 #include <string.h>

@@ -1,9 +1,4 @@
-/* tokenize.h
- * $Id$
- */
-
-#ifndef __TOKENIZE_H
-#define __TOKENIZE_H
+#pragma once
 
 /* BASIC mode selected */
 typedef enum basic_e {
@@ -12,5 +7,3 @@ typedef enum basic_e {
 
 int tokenize(const char *input_p, char *output_p, int *length_p, basic_t mode);
 int detokenize(const char *input_p, char *output_p, basic_t mode, int strict);
-
-#endif

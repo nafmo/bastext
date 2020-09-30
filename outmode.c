@@ -1,6 +1,5 @@
 /* outmode.c
  * - Routines for converting text to binary
- * $Id$
  */
 
 #include <stdio.h>

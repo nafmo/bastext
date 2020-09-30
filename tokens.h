@@ -1,9 +1,4 @@
-/* tokens.h
- * $Id$
- */
-
-#ifndef __TOKENS_H
-#define __TOKENS_H
+#pragma once
 
 /* C64 BASIC 2.0 */
 extern const char *c64tokens[];
@@ -34,5 +29,3 @@ extern const char *supertokens[];
 /* PETSCII */
 extern const char *petscii[];
 int nontok64compatible(int petscii);
-
-#endif

@@ -1,7 +1,6 @@
 /* tokens.c
  * - contains a list of C64 BASIC and C128 BASIC tokens
  *   as well as a PETSCII table
- * $Id$
  */
 
 #include "tokens.h"

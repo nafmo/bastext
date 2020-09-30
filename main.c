@@ -1,6 +1,5 @@
 /* main.c
  * - main routines for bastext
- * $Id$
  */
 #include <string.h>
 #include <stdlib.h>

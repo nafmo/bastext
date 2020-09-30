@@ -1,11 +1,4 @@
-/* inmode.h
- * $Id$
- */
-
-#ifndef __INMODE_H
-#define __INMODE_H
+#pragma once
 
 void bas2txt(const char *infile, FILE *output, int allfiles, int strict);
 void t642txt(const char *infile, FILE *output, int allfiles, int strict);
-
-#endif

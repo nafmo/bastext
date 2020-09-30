@@ -1,5 +1,4 @@
-#ifndef __T64_H
-#define __T64_H
+#pragma once
 
 /* Structure definitions for the T64 archive format.
  * NB: The structures are written here to be useable without knowing whether
@@ -48,5 +47,3 @@ typedef struct t64record_s {
 
 int checkvalidheader(t64header_t *header_p, unsigned int *totalentries_p,
                      unsigned int *usedentries_p, const char *filename);
-
-#endif

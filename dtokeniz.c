@@ -1,6 +1,5 @@
 /* detokenize.c
  * - routines to detokenize C64/C128 BASIC
- * $Id$
  */
 
 #include <string.h>

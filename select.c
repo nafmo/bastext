@@ -1,5 +1,4 @@
 /* select.c
- * $Id$
  */
 
 #include <stdio.h>

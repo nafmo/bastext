@@ -1,6 +1,5 @@
 /* inmode.c
  * - Routines for converting binary to text
- * $Id$
  */
 
 #include <stdio.h>
