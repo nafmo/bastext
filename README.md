@@ -1,9 +1,9 @@
 BasText - convert Commodore BASIC to text
 ==========================================
-Copyright 1997-1999 peter Karlsson.
+Copyright 1997-1999 Peter Krefting.
 A Softwolves Software Release in 1999
 
-http://www.softwolves.pp.se/wolves/
+http://www.softwolves.pp.se/sw/
 
 LICENSE
 --------
@@ -222,7 +222,7 @@ BasText does not yet support the "bare" format that tok64 normally outputs
 CONTACT
 --------
 
-The author, Peter Karlsson, can be contacted
+The author, Peter Krefting, can be contacted
 via Internet e-mail at peter@softwolves.pp.se. Information about this
-program is available on the world wide web at
-http://www.softwolves.pp.se/wolves/
+program is available at
+http://www.softwolves.pp.se/sw/
