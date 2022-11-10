@@ -185,17 +185,20 @@ void txt2bas(const char *infile, basic_t force, int t64mode)
 				strcpy(text, filename);
 				if (NULL != (c_p = strstr(text, ".prg"))) {
 					*c_p = 0;
+				} else {
+					c_p = text + strlen(text);
 				}
-				strncpy(record.filename, text, sizeof(record.filename));
 				/* Make uppercase, convert _ to spaces, and fill with spaces.
-				 * (strncpy pads with nulls if src is less than 'n')
 				 */
-				for (i = 0; i < sizeof(filename); i ++) {
-					if (0 == record.filename[i] || '_' == record.filename[i]) {
+				for (i = 0; i < sizeof(record.filename); i ++) {
+					if (i >= c_p - text || '_' == record.filename[i]) {
 						record.filename[i] = ' ';
 					}
-					else if (0x60 == (0x60 & record.filename[i])) {
-						record.filename[i] &= ~0x20;
+					else if (0x60 == (0x60 & text[i])) {
+						record.filename[i] = text[i] & ~0x20;
+					}
+					else {
+						record.filename[i] = text[i];
 					}
 				}
 
