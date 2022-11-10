@@ -56,6 +56,7 @@ void txt2bas(const char *infile, basic_t force, int t64mode)
 			output = fopen("bastext.t64", "w+b");
 			if (NULL == output) {
 				fprintf(stderr, "Unable to create output file bastext.t64\n");
+				exit(1);
 			}
 
 			/* Create standard header */
