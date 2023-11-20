@@ -576,7 +576,7 @@ const char *petscii[] = {
 	"cm l",
 	"cm y",
 	"cm u",
-	"cm d",
+	"cm o",
 	"sh @",
 	"cm f",
 	"cm c",
