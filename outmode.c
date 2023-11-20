@@ -61,7 +61,8 @@ void txt2bas(const char *infile, basic_t force, int t64mode)
 
 			/* Create standard header */
 			memset(&header, 0, sizeof(header));
-			strcpy(header.description, "C64 tape image file " PROGNAME "\x1a");
+			const char description[sizeof header.description] = "C64 tape image file " PROGNAME " " PROGVERSION "\x1a";
+			memcpy(header.description, description, 32);
 			memcpy(header.title, "CREATED BY BASTEXT      ", 24);
 			header.version[0]  = 0x00;					/* low */
 			header.version[1]  = 0x01;					/* high */

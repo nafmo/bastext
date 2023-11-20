@@ -162,7 +162,7 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
 
 		/* Print bastext header if start is != 0x0801 and != 0x1C01 */
 		if (0x0801 != adr && 0x1C01 != adr) {
-			fprintf(output, "\nstart bastext %d", adr);
+			fprintf(output, "\nstart bastext %d " PROGVERSION, adr);
 		}
 
 		/* Print tok64 header */
@@ -228,10 +228,10 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
 
 		/* Print tok64 footer */
 		if (Basic7 == mode || Basic71 == mode) {
-			fprintf(output, "stop tok128\n(" PROGNAME ")\n");
+			fprintf(output, "stop tok128\n(" PROGNAME " " PROGVERSION ")\n");
 		}
 		else {
-			fprintf(output, "stop tok64\n(" PROGNAME ")\n");
+			fprintf(output, "stop tok64\n(" PROGNAME " " PROGVERSION ")\n");
 		}
 	}
 	else {

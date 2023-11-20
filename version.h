@@ -1,3 +1,4 @@
 #pragma once
 
-#define PROGNAME "bastext 1.0"
+#define PROGNAME "bastext"
+#define PROGVERSION "1.1"
