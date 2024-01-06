@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# Fixes Git history to include the reconstructed v1.0 commit, which is
+# the 1.0 ZIP imported. The initial commit to version control (CVS)
+# was not made until much later that year.
+
+# Import the replacement commit
+NEWCOMMIT="$(git hash-object -w -t commit fcd0ef34f692451ac60acccb80beccb87dbd26a4.replace)"
+if [ -z "$NEWCOMMIT" ]; then
+  echo "Failed to hash replacement commit object."
+  exit 1
+fi
+
+# Replace the original commit
+if ! git replace fcd0ef34f692451ac60acccb80beccb87dbd26a4 "$NEWCOMMIT"; then
+  echo "Failed to replace the commit."
+  exit 1
+fi
+
+# Done
+echo "Git history modified."
