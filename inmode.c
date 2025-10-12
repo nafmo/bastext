@@ -27,6 +27,7 @@ void bas2txt(const char *infile, FILE *output, int allfiles, int strict)
 {
 	FILE		*input;
 	const char	*title_p;
+	char        title_buf[17];
 	int			adr;
 
 	/* First, open input file */
@@ -52,6 +53,36 @@ void bas2txt(const char *infile, FILE *output, int allfiles, int strict)
 	/* First read the start address */
 	adr = fgetc(input);			/* low byte */
 	adr |= fgetc(input) << 8;	/* high byte */
+
+	/* Check for P00 file signature - "C64File\0" */
+	if (0x3643 == adr)
+	{
+		if (fgetc(input) != '4' ||
+		    fgetc(input) != 'F' ||
+		    fgetc(input) != 'i' ||
+		    fgetc(input) != 'l' ||
+		    fgetc(input) != 'e' ||
+		    fgetc(input) != 0)
+		{
+			/* It wasn't -> panic */
+			fprintf(stderr, "Unable to identify file header: %s\n", infile);
+			exit(1);
+		}
+
+		/* Read the PETSCII file name and point to it */
+		memset(title_buf, 0, sizeof(title_buf));
+		fread(title_buf, 1, 16, input);
+		title_p = title_buf;
+
+		/* Ignore nul and REL metadata */
+		fgetc(input);
+		fgetc(input);
+
+		/* The file pointer now points to actual data; get the actual start
+		 * address  */
+		adr = fgetc(input);			/* low byte */
+		adr |= fgetc(input) << 8;	/* high byte */
+	}
 
 	/* Now convert the file to text */
 	inconvert(input, output, title_p, adr, allfiles, strict);

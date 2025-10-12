@@ -1,7 +1,7 @@
 BasText - convert Commodore BASIC to text
 ==========================================
-Copyright 1997-2023 Peter Krefting.
-A Softwolves Software Release in 2023
+Copyright 1997-2025 Peter Krefting.
+A Softwolves Software Release in 2025
 
 http://www.softwolves.pp.se/sw/
 
@@ -175,6 +175,11 @@ EXAMPLES
 
 Converts sample.prg to text, and displays it on the standard output.
 
+    bastext -i sample.p00
+
+Converts sample.p00 to text, and displays it on the standard output. The P00
+file format is detected automatically.
+
     bastext -i -s -d programs.txt *.prg
 
 Converts all Commodore BASIC binary files with a prg extension to text,
@@ -199,6 +204,8 @@ HISTORY
 * v1.1 - 2023-11-21 -
   Fix incorrect keyboard mapping.
   Fix VICE compatibility.
+* v1.2 - unreleased -
+  Add support for reading P00 archives.
 
 KNOWN BUGS
 -----------
