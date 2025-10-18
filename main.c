@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
 	 *  5 (G52)  - force Graphics52 BASIC    >- out mode only,
 	 *  7 (7.0)  - force BASIC 7.0          /   if not specified, looks at
 	 *  1 (7.1)  - force BASIC 7.1        -/    "start bastext" header
+	 *  x (x16)  - force X16 BASIC (r48)
 	 *  a (all)  - convert all programs, not only those with recognized start
 	 *             address (0401/0801/1001/1201/132D/1C01/4001)
 	 *  s (strict)-strict tok64 encoding
@@ -61,7 +62,7 @@ int main(int argc, char *argv[])
 	 *  h (help) - print help page
 	 *  ? (help)
 	 */
-	while (-1 != (option = getopt(argc, argv, "iot23571asd:h?"))) {
+	while (-1 != (option = getopt(argc, argv, "iot23571xasd:h?"))) {
 		switch (option) {
 			case 'i':
 				mode = In;
@@ -93,6 +94,10 @@ int main(int argc, char *argv[])
 
 			case '1':
 				force = Basic71;
+				break;
+
+			case 'x':
+				force = X16;
 				break;
 
 			case 'a':
@@ -128,7 +133,8 @@ int main(int argc, char *argv[])
 				                "  " SWITCH "3\tForce C64 TFC3 interpretation\n"
 				                "  " SWITCH "5\tForce C64 Graphics52 interpretation\n"
 				                "  " SWITCH "7\tForce C128 BASIC 7.0 interpretation\n"
-				                "  " SWITCH "1\tForce C128 BASIC 7.1 interpretation\n",
+				                "  " SWITCH "1\tForce C128 BASIC 7.1 interpretation\n"
+				                "  " SWITCH "x\tForce X16 BASIC interpretation\n",
 				        argv[0]);
 				return 0;
 				break;

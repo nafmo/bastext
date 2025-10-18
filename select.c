@@ -17,8 +17,9 @@ basic_t selectbasic(int adr)
 	 * BASIC version
 	 *  0401 => BASIC 2.0 (VIC20, +3K RAM) or Graphics52 (C64)
 	 *          Graphics52 is the super-set, select it
-	 *  0801 => BASIC 2.0 (C64) or TFC3 BASIC (C64)
-	 *          TFC3 is the super-set, select it
+	 *  0801 => BASIC 2.0 (C64), TFC3 BASIC (C64) or
+	 *          Commander X16 BASIC (X16)
+	 *          X16 is a better fit for the 21st century, select it
 	 *  1001 => BASIC 2.0 (VIC20 unexpanded)
 	 *  1201 => BASIC 2.0 (VIC20 +8K RAM)
 	 *  132D => BASIC 7.1 (C128) with bound extension file
@@ -30,30 +31,24 @@ basic_t selectbasic(int adr)
 	switch (adr) {
 		case 0x0401:
 			return Graphics52;
-			break;
 
 		case 0x0801:
-			return TFC3;
-			break;
+			return X16;
 
 		case 0x1001:
 		case 0x1201:
 			return Basic2;
-			break;
 
 		case 0x132D:
 		case 0x1C01:
 			return Basic71;
-			break;
 
 		case 0x4001:
 			return Basic7;
-			break;
 
 		default:
 			fprintf(stderr, "* Unrecognized start address of BASIC: %04x\n",
 			        adr);
 			return Basic71;
-			break;
 	}
 }

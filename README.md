@@ -35,6 +35,7 @@ this version of BasText:
 * SpeechBASIC 2.7 for Commodore 64
 * AtBasic for Commodore 64
 * Simon's BASIC for Commodore 64
+* Commander X16
 
 BasText tries to autodetect the Commodore BASIC dialect used in the file it
 is processing. At the moment, this is done by checking the starting address
@@ -206,6 +207,7 @@ HISTORY
   Fix VICE compatibility.
 * v1.2 - unreleased -
   Add support for reading P00 archives.
+  Add Commander X16 tokens.
 
 KNOWN BUGS
 -----------

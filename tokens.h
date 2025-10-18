@@ -26,6 +26,10 @@ extern const char *basic4tokens[];
  */
 extern const char *supertokens[];
 
+/* Commander X16 BASIC (r48)
+ */
+extern const char *x16tokens[];
+
 /* PETSCII */
 extern const char *petscii[];
 int nontok64compatible(int petscii);

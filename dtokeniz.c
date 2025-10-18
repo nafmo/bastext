@@ -132,6 +132,17 @@ int detokenize(const char *input_p, char *output_p, basic_t mode, int strict)
 					ch_p ++;
 					output_p += sprintf(output_p, "%s",
 					                    c128CEtokens[*ch_p]);
+				//*****************************************************//
+				} /* else */
+				else if (*ch_p == 0xCE &&
+				         ((*(ch_p + 1) >= 0x80 && *(ch_p + 1) <= 0xC0) ||
+				          (*(ch_p + 1) >= 0xD0 && *(ch_p + 1) <= 0xDD)) &&
+				          (X16 == mode)) {
+					/* X16 CE prefix */
+					ch_p ++;
+					output_p += sprintf(output_p, "%s",
+					                    x16tokens[(*ch_p) - 0x80]);
+				//*****************************************************//
 				} /* else */
 				else if (*ch_p == 0xFE && *(ch_p + 1) >= 2 &&
 				         ((*(ch_p + 1) <= 0x26 && Basic7 == mode) ||
