@@ -221,8 +221,17 @@ correct PETSCII values. The problem will appear when you convert the program
 in one direction with bastext and in the other with tok64, not when using
 the same program in both directions.
 
-BasText does not yet support the "bare" format that tok64 normally outputs
+BasText does not support the "bare" format that tok64 normally outputs
 (without the start tok64 header).
+
+CREDITS
+-----------
+
+* Thanks to Dirk Jagdmann for patches to update sources for compilers
+  20 years newer than what it was originally written for.
+* Thanks to Stig Christensen for suggestions for improvements and bug
+  reports.
+* Thanks to morphinejh for Commander X16 BASIC support.
 
 CONTACT
 --------
