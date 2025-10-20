@@ -25,6 +25,8 @@ typedef enum runmode_e { None, In, Out } runmode_t;
 # define SWITCH "-"
 #endif
 
+void helpscreen(const char *progname);
+
 /* main
  * - main routine
  * evaluates arguments and call the appropriate routines
@@ -115,32 +117,7 @@ int main(int argc, char *argv[])
 			case 'h':
 			case '?':
 			case ':':
-				fprintf(stderr, "Usage:\n"
-				                "  %s " SWITCH "i [" SWITCH "t] [" SWITCH "x] [" SWITCH "a] [" SWITCH "s] [" SWITCH "d filename] filename(s)\n"
-				                "  %s " SWITCH "o [" SWITCH "t] [" SWITCH "2|" SWITCH "3|" SWITCH "4|" SWITCH "5|" SWITCH "7|" SWITCH "1|" SWITCH "x] filename(s)\n"
-				                "  %s " SWITCH "h\n"
-				                "\n Mode (one of these required):\n"
-				                "  " SWITCH "i\tInput mode (binary to text)\n"
-				                "  " SWITCH "o\tOutput mode (text to binary)\n"
-				                "  " SWITCH "h\tPrint help page\n"
-				                "\n General modfiers:\n"
-				                "  " SWITCH "t\tT64 mode (in: reads from specified T64 archive(s)\n"
-				                "    \t          out: creates/appends to bastext.t64)\n"
-				                "  " SWITCH "x\tEnable Commander X16 BASIC support\n"
-				                "\n Input mode modfiers:\n"
-				                "  " SWITCH "a\tConvert all, not just recognized start addresses\n"
-				                "    \t (0401/0801/1001/1201/132D/1C01/4001)\n"
-				                "  " SWITCH "s\tStrict tok64 compatibility\n"
-				                "  " SWITCH "d fn\tSend output to file fn\n"
-				                "\n Output mode modifiers:\n"
-				                "  " SWITCH "2\tForce C64 BASIC 2.0 interpretation\n"
-				                "  " SWITCH "3\tForce C64 TFC3 interpretation\n"
-				                "  " SWITCH "5\tForce C64 Graphics52 interpretation\n"
-				                "  " SWITCH "7\tForce C128 BASIC 7.0 interpretation\n"
-				                "  " SWITCH "1\tForce C128 BASIC 7.1 interpretation\n",
-				        argv[0],
-				        argv[0],
-				        argv[0]);
+				helpscreen(argv[0]);
 				return 0;
 
 			default:
@@ -150,9 +127,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (None == mode) {		/* missing mode option */
-		fprintf(stderr, "No operation mode specified\n"
-		                "-- use '%s " SWITCH "h' for help\n",
-		        argv[0]);
+		helpscreen(argv[0]);
 		return 1;
 	}
 
@@ -200,4 +175,36 @@ int main(int argc, char *argv[])
 
 	/* Close output file, if any */
 	if (output != stdout)	fclose(output);
+}
+
+/* Output the help screen */
+void helpscreen(const char *progname)
+{
+	fprintf(stderr,
+	        "Usage:\n"
+	        "  %s " SWITCH "i [" SWITCH "t] [" SWITCH "x] [" SWITCH "a] [" SWITCH "s] [" SWITCH "d filename] filename(s)\n"
+	        "  %s " SWITCH "o [" SWITCH "t] [" SWITCH "2|" SWITCH "3|" SWITCH "4|" SWITCH "5|" SWITCH "7|" SWITCH "1|" SWITCH "x] filename(s)\n"
+	        "  %s " SWITCH "h\n"
+	        "\n Mode (one of these required):\n"
+	        "  " SWITCH "i\tInput mode (binary to text)\n"
+	        "  " SWITCH "o\tOutput mode (text to binary)\n"
+	        "  " SWITCH "h\tPrint help page\n"
+	        "\n General modfiers:\n"
+	        "  " SWITCH "t\tT64 mode (in: reads from specified T64 archive(s)\n"
+	        "    \t          out: creates/appends to bastext.t64)\n"
+	        "  " SWITCH "x\tEnable Commander X16 BASIC support\n"
+	        "\n Input mode modfiers:\n"
+	        "  " SWITCH "a\tConvert all, not just recognized start addresses\n"
+	        "    \t (0401/0801/1001/1201/132D/1C01/4001)\n"
+	        "  " SWITCH "s\tStrict tok64 compatibility\n"
+	        "  " SWITCH "d fn\tSend output to file fn\n"
+	        "\n Output mode modifiers:\n"
+	        "  " SWITCH "2\tForce C64 BASIC 2.0 interpretation\n"
+	        "  " SWITCH "3\tForce C64 TFC3 interpretation\n"
+	        "  " SWITCH "5\tForce C64 Graphics52 interpretation\n"
+	        "  " SWITCH "7\tForce C128 BASIC 7.0 interpretation\n"
+	        "  " SWITCH "1\tForce C128 BASIC 7.1 interpretation\n",
+	        progname,
+	        progname,
+	        progname);
 }
