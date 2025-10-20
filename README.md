@@ -224,6 +224,7 @@ HISTORY
 * v1.2 - unreleased -
   Add support for reading and writing P00 archives.
   Add Commander X16 tokens.
+  Fix Graphics52 tokenizer.
 
 KNOWN BUGS
 -----------

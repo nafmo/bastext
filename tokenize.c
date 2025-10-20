@@ -283,7 +283,7 @@ int tokenize(const char *input_p, char *output_p, int *length_p, basic_t mode)
 
 			/* Graphics52 */
 			if (!match && Graphics52 == mode) {
-				for (i = 0; i <= 50 && !match; i ++) {
+				for (i = 0; i <= 49 && !match; i ++) {
 					tokenlen = strlen(graphics52tokens[i]);	/* as above */
 					if (inputleft >= tokenlen &&
 					    0 == strncasecmp(input_p, graphics52tokens[i],
