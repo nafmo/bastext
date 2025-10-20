@@ -157,6 +157,16 @@ void txt2bas(const char *infile, basic_t force, int t64mode)
 					if (Any == force)	mode = Basic71;
 				}
 			}
+			else if (strncasecmp(text, "start tokx16 ", 13) == 0) {
+				/* This is the header that starts the actual BASIC text */
+				foundheader = TRUE;
+
+				/* Retrieve the file name */
+				strcpy(filename, &text[13]);
+
+				/* This is always a Commander X16 program */
+				mode = X16;
+			}
 		}
 		
 		if (foundheader) {

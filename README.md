@@ -116,6 +116,8 @@ Shows a brief help screen, with an overview of the available options.
 These general modifiers (works in both input and output modes) are
 available:
 
+These options apply to both input and output mode:
+
     -t
 Enable T64 (Commodore 64 emulator tape archive) mode. When in input
 mode, this means that instead of the specified file names being binary
@@ -127,6 +129,13 @@ will be appended to. The default directory size for the bastext.t64
 file is 30 entries. If you try to add more files to it, the program
 will abort with an error message. The default directory size is
 controlled in the t64.h file.
+
+    -x
+Enable Commander X16 BASIC support. This must be specified in input
+mode to properly detokenize Commander X16 BASIC binary. In output mode,
+the tokx16 header will enable Commander X16 BASIC mode no matter
+which BASIC mode has been selected, but -x must be specifid if the
+text file uses a standard tok64 header.
 
 These modifiers are available only when in input mode:
 

@@ -14,16 +14,17 @@
 #define FALSE 0
 #define TRUE 1
 
-void inconvert(FILE *, FILE *, const char *, int, int, int);
+void inconvert(FILE *, FILE *, const char *, int, int, int, int);
 
 /* bas2txt
  * - converts a binary file into a text file
  * in:	infile - file name of file to read
  *		allfiles - flag whether or not to convert "non-BASIC" files
  *		strict - flag for using strict tok64 compatibility
+ *      x16enable - enable Commander X16 BASIC
  * out:	none
  */
-void bas2txt(const char *infile, FILE *output, int allfiles, int strict)
+void bas2txt(const char *infile, FILE *output, int allfiles, int strict, int x16enable)
 {
 	FILE		*input;
 	const char	*title_p;
@@ -85,13 +86,13 @@ void bas2txt(const char *infile, FILE *output, int allfiles, int strict)
 	}
 
 	/* Now convert the file to text */
-	inconvert(input, output, title_p, adr, allfiles, strict);
+	inconvert(input, output, title_p, adr, allfiles, strict, x16enable);
 
 	/* Close files */
 	fclose(input);
 }
 
-void t642txt(const char *infile, FILE *output, int allfiles, int strict)
+void t642txt(const char *infile, FILE *output, int allfiles, int strict, int x16enable)
 {
 	FILE			*input;
 	char			title[21], *c_p;
@@ -163,7 +164,7 @@ void t642txt(const char *infile, FILE *output, int allfiles, int strict)
 
 			/* Now convert the file to text */
 			fprintf(stderr, "Converting: %s\n", title);
-			inconvert(input, output, title, adr, allfiles, strict);
+			inconvert(input, output, title, adr, allfiles, strict, x16enable);
 		}
 	}
 
@@ -177,10 +178,12 @@ void t642txt(const char *infile, FILE *output, int allfiles, int strict)
  * 		output - open file, to write to
  *		title - program title to print in header
  *		allfiles - flag whether or not to convert "non-BASIC" files
+ *      strict - output in strict tok64 compatible mode
+ *      x16enable - enable Commander X16 BASIC
  * out:	none
  */
 void inconvert(FILE *input, FILE *output, const char *title, int adr,
-               int allfiles, int strict)
+               int allfiles, int strict, int x16enable)
 {
 	int		nextadr;
 	char	buf[256], text[512];
@@ -189,7 +192,12 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
 	/* Check for valid BASIC file */
 	if (allfiles || 0x0401 == adr || 0x0801 == adr || 0x1c01 == adr ||
 	    0x4001 == adr || 0x132D == adr) {
-		mode = selectbasic(adr);
+		if (x16enable) {
+			mode = X16;
+		}
+		else {
+			mode = selectbasic(adr);
+		}
 
 		/* Print bastext header if start is != 0x0801 and != 0x1C01 */
 		if (0x0801 != adr && 0x1C01 != adr) {
@@ -205,6 +213,11 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
 				        title);
 			}
 			fprintf(output, "\nstart tok128 %s\n", title);
+		}
+		else if (X16 == mode) {
+			/* tok64 doesn't handle X16 programs, so ignore strict mode */
+			strict = FALSE;
+			fprintf(output, "\nstart tokx16 %s\n", title);
 		}
 		else {
 			fprintf(output, "\nstart tok64 %s\n", title);

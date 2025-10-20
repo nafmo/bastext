@@ -17,9 +17,10 @@ basic_t selectbasic(int adr)
 	 * BASIC version
 	 *  0401 => BASIC 2.0 (VIC20, +3K RAM) or Graphics52 (C64)
 	 *          Graphics52 is the super-set, select it
-	 *  0801 => BASIC 2.0 (C64), TFC3 BASIC (C64) or
-	 *          Commander X16 BASIC (X16)
-	 *          X16 is a better fit for the 21st century, select it
+	 *  0801 => BASIC 2.0 (C64) or TFC3 BASIC (C64)
+	 *          TFC3 is the super-set, select it
+	 *          NB! Commander X16 BASIC also uses 0801, but
+	 *          must use the -x option.
 	 *  1001 => BASIC 2.0 (VIC20 unexpanded)
 	 *  1201 => BASIC 2.0 (VIC20 +8K RAM)
 	 *  132D => BASIC 7.1 (C128) with bound extension file
@@ -33,7 +34,7 @@ basic_t selectbasic(int adr)
 			return Graphics52;
 
 		case 0x0801:
-			return X16;
+			return TFC3;
 
 		case 0x1001:
 		case 0x1201:
