@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
 	int			option, i;
 	int			allfiles = FALSE;
 	int			t64mode = FALSE;
+	int			p00mode = FALSE;
 	int			strict = FALSE;
 	runmode_t	mode = None;
 	basic_t		force = Any;
@@ -51,6 +52,7 @@ int main(int argc, char *argv[])
 	 *  i (in)   - convert from binary to text
 	 *  o (out)  - convert from text to binary
 	 *  t (t64)  - T64 mode
+	 *  p (p00)  - P00 mode (out mode only; autodetected in in mode)
 	 *  2 (2.0)  - force BASIC 2.0        -\
 	 *  3 (TFC3) - force TFC3 BASIC         \
 	 *  5 (G52)  - force Graphics52 BASIC    >- out mode only,
@@ -64,7 +66,7 @@ int main(int argc, char *argv[])
 	 *  h (help) - print help page
 	 *  ? (help)
 	 */
-	while (-1 != (option = getopt(argc, argv, "iot23571xasd:h?"))) {
+	while (-1 != (option = getopt(argc, argv, "iotp23571xasd:h?"))) {
 		switch (option) {
 			case 'i':
 				mode = In;
@@ -76,6 +78,10 @@ int main(int argc, char *argv[])
 
 			case 't':
 				t64mode = TRUE;
+				break;
+
+			case 'p':
+				p00mode = TRUE;
 				break;
 
 			case '2':
@@ -165,7 +171,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case Out:
-				txt2bas(argv[i], force, t64mode);
+				txt2bas(argv[i], force, t64mode ? T64 : (p00mode ? P00 : Prg));
 				break;
 
 		case None:
@@ -183,7 +189,7 @@ void helpscreen(const char *progname)
 	fprintf(stderr,
 	        "Usage:\n"
 	        "  %s " SWITCH "i [" SWITCH "t] [" SWITCH "x] [" SWITCH "a] [" SWITCH "s] [" SWITCH "d filename] filename(s)\n"
-	        "  %s " SWITCH "o [" SWITCH "t] [" SWITCH "2|" SWITCH "3|" SWITCH "4|" SWITCH "5|" SWITCH "7|" SWITCH "1|" SWITCH "x] filename(s)\n"
+	        "  %s " SWITCH "o [" SWITCH "t|" SWITCH "p] [" SWITCH "2|" SWITCH "3|" SWITCH "4|" SWITCH "5|" SWITCH "7|" SWITCH "1|" SWITCH "x] filename(s)\n"
 	        "  %s " SWITCH "h\n"
 	        "\n Mode (one of these required):\n"
 	        "  " SWITCH "i\tInput mode (binary to text)\n"
@@ -199,6 +205,7 @@ void helpscreen(const char *progname)
 	        "  " SWITCH "s\tStrict tok64 compatibility\n"
 	        "  " SWITCH "d fn\tSend output to file fn\n"
 	        "\n Output mode modifiers:\n"
+	        "  " SWITCH "p\tP00 mode (out: wraps output in .p00 container)\n"
 	        "  " SWITCH "2\tForce C64 BASIC 2.0 interpretation\n"
 	        "  " SWITCH "3\tForce C64 TFC3 interpretation\n"
 	        "  " SWITCH "5\tForce C64 Graphics52 interpretation\n"

@@ -9,6 +9,7 @@
 #include "tokenize.h"
 #include "version.h"
 #include "t64.h"
+#include "p00.h"
 #include "select.h"
 
 #define FALSE 0
@@ -19,15 +20,16 @@
 #endif
 
 int outconvert(FILE *, FILE *, int, basic_t);
+void make_petscii_name(char petscii_filename[16], const char *filename, char filler);
 
 /* txt2bas
  * - converts a text file into a binary file
  * in:	infile - file name of file to read
  *		force - flag for forcing a BASIC mode (Any for autodetect)
- *		t64mode - flag for putting the files in a T64 archive
+ *		outmode - flag for putting the files in a T64 or P00 container
  * out:	none
  */
-void txt2bas(const char *infile, basic_t force, int t64mode)
+void txt2bas(const char *infile, basic_t force, outmode_t outmode)
 {
 	FILE			*input, *output;
 	int				adr;
@@ -37,6 +39,7 @@ void txt2bas(const char *infile, basic_t force, int t64mode)
 	int				foundheader, foundextraheader;
 	t64header_t		header;
 	t64record_t		record;
+	p00header_t		p00header;
 	unsigned int	totalentries, usedentries, i;
 	long			fptr;
 
@@ -48,7 +51,7 @@ void txt2bas(const char *infile, basic_t force, int t64mode)
 	}
 
 	/* Secondly, if in T64 mode, open the T64 archive */
-	if (t64mode) {
+	if (T64 == outmode) {
 		/* If the T64 file exists, we want to continue adding to it */
 		output = fopen("bastext.t64", "r+b");
 		if (NULL == output) {
@@ -175,7 +178,7 @@ void txt2bas(const char *infile, basic_t force, int t64mode)
 			 */
 			fprintf(stderr, "Tokenizing: %s\n", filename);
 
-			if (t64mode) {
+			if (T64 == outmode) {
 				/* Check if the T64 is full */
 				if (usedentries >= totalentries) {
 					fprintf(stderr, "T64 archive full: bastext.t64\n");
@@ -190,29 +193,7 @@ void txt2bas(const char *infile, basic_t force, int t64mode)
 				record.filetype = 1; /* 0x82? */		/* PRG */
 				record.startaddress[0] = adr & 0xFF;	/* low */
 				record.startaddress[1] = adr >> 8;		/* high */
-
-				/* Remove .prg from filename, copy it to the T64 record,
-				 * and make uppercase
-				 */
-				strcpy(text, filename);
-				if (NULL != (c_p = strstr(text, ".prg"))) {
-					*c_p = 0;
-				} else {
-					c_p = text + strlen(text);
-				}
-				/* Make uppercase, convert _ to spaces, and fill with spaces.
-				 */
-				for (i = 0; i < sizeof(record.filename); i ++) {
-					if (i >= c_p - text || '_' == record.filename[i]) {
-						record.filename[i] = ' ';
-					}
-					else if (0x60 == (0x60 & text[i])) {
-						record.filename[i] = text[i] & ~0x20;
-					}
-					else {
-						record.filename[i] = text[i];
-					}
-				}
+				make_petscii_name(record.filename, filename, ' ');
 
 				/* Seek to end of file, and enter start offset into the
 				 * file record
@@ -225,7 +206,34 @@ void txt2bas(const char *infile, basic_t force, int t64mode)
 				record.offset[3] = fptr >> 24;		/* high */
 			}
 			else {
-				output = fopen(filename, "wb");
+				if (P00 == outmode) {
+					/* Create output filename; chop at first dot and add
+					 * P00 suffix and make all lowercase. We do not do
+					 * the full PC64 algorithm here, so no P01, P02,
+					 * P03... */
+					strcpy(text, filename);
+					c_p = strchr(text, '.');
+					if (NULL == c_p) {
+						c_p = text + strlen(text);
+					}
+					strcpy(c_p, ".p00"); /* Safe; filename length is max 256 - 12 */
+					for (c_p = text; *c_p; ++ c_p) {
+						if (*c_p >= 'A' && *c_p <= 'Z') {
+							*c_p |= 0x20;
+						}
+					}
+					output = fopen(text, "wb");
+
+					/* Create a P00 file header */
+					memset(&p00header, 0, sizeof(p00header));
+					strcpy(p00header.description, "C64File");
+					make_petscii_name(p00header.filename, filename, '\0');
+					fwrite(&p00header, sizeof(p00header), 1, output);
+				}
+				else {
+					/* Write a direct binary file */
+					output = fopen(filename, "wb");
+				}
 
 				/* Write the start address */
 				fputc(adr & 0xFF, output);		/* low */
@@ -235,7 +243,7 @@ void txt2bas(const char *infile, basic_t force, int t64mode)
 			/* Now convert the file to text */
 			adr = outconvert(input, output, adr, mode);
 
-			if (t64mode) {
+			if (T64 == outmode) {
 				/* Finish the T64 record (we now know the ending address)
 				 * and write it to the first unused position.
 				 */
@@ -269,7 +277,7 @@ void txt2bas(const char *infile, basic_t force, int t64mode)
 	/* Close input */
 	fclose(input);
 
-	if (t64mode) {
+	if (T64 == outmode) {
 		/* Close T64 */
 		fclose(output);
 	}
@@ -375,4 +383,40 @@ int outconvert(FILE *input, FILE *output, int adr, basic_t mode)
 	 * last used address is adr+1
 	 */
 	return adr + 1;
+}
+
+/* Remove .prg from filename, copy it to the T64 or P00 record,
+ * and confine to uppercase PETSCII.
+ *
+ * filename must be less than 256 characters long.
+ */
+void make_petscii_name(char petscii_filename[16], const char *filename, char filler)
+{
+	char			text[256], *c_p;
+	unsigned int	i;
+
+	strcpy(text, filename);
+	if (NULL != (c_p = strstr(text, ".prg"))) {
+		*c_p = 0;
+	} else {
+		c_p = text + strlen(text);
+	}
+
+	/* Make uppercase, convert _ to spaces, and fill with 'filler'.
+	 */
+	for (i = 0; i < 16; i ++) {
+		if (i >= c_p - text) {
+			petscii_filename[i] = filler;
+		}
+		else if ('_' == petscii_filename[i]) {
+		         petscii_filename[i] = ' ';
+			petscii_filename[i] = ' ';
+		}
+		else if (0x60 == (0x60 & text[i])) {
+			petscii_filename[i] = text[i] & ~0x20;
+		}
+		else {
+			petscii_filename[i] = text[i];
+		}
+	}
 }

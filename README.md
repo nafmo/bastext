@@ -158,6 +158,13 @@ output device (normally the console).
 
 These modifiers are available only when in output mode:
 
+    -p
+Enable P00 (PC64 emulator container file) mode. The Commodore BASIC
+files are written to the current directory but get a PC64 container
+header written to them and a file extension of .p00 added. This
+parameter is ignored in input mode, as it will auto-detect the .p00
+container format.
+
     -2
 Force Commodore BASIC 2.0 interpretation of all programs.
 
@@ -215,7 +222,7 @@ HISTORY
   Fix incorrect keyboard mapping.
   Fix VICE compatibility.
 * v1.2 - unreleased -
-  Add support for reading P00 archives.
+  Add support for reading and writing P00 archives.
   Add Commander X16 tokens.
 
 KNOWN BUGS
