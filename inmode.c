@@ -190,7 +190,8 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
 	basic_t	mode;
 
 	/* Check for valid BASIC file */
-	if (allfiles || 0x0401 == adr || 0x0801 == adr || 0x1c01 == adr ||
+	if (allfiles || 0x0401 == adr || 0x0801 == adr || 0x1001 == adr ||
+	    0x1201 == adr || 0x1c01 == adr ||
 	    0x4001 == adr || 0x132D == adr) {
 		if (x16enable) {
 			mode = X16;
