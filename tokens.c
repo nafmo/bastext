@@ -387,10 +387,12 @@ const char *supertokens[] = {
 
 /* Commander X16 CE tokens (r48)
  * offset: 128 (0x80)
+ * Based on basic/tok2en2.s from https://github.com/X16Community/x16-rom/
  */
 
 const char *x16tokens[]={
-	"MON",		/* 0xCE 0x80 */
+	/* instructions */
+	"MON",		/* 0xCE 0x80 */		/* reslst2 */
 	"DOS",		/* 0xCE 0x81 */
 	"OLD",		/* 0xCE 0x82 */
 	"GEOS",		/* 0xCE 0x83 */
@@ -434,7 +436,7 @@ const char *x16tokens[]={
 	"PSGPAN",	/* 0xCE 0xA9 */
 	"PSGPLAY",	/* 0xCE 0xAA */
 	"PSGCHORD",	/* 0xCE 0xAB */
-	"REBOOT",	/* 0xCE 0xAC */
+	"REBOOT",	/* 0xCE 0xAC */		/* reslst3 */
 	"POWEROFF",	/* 0xCE 0xAD */
 	"I2CPOKE",	/* 0xCE 0xAE */
 	"SLEEP",	/* 0xCE 0xAF */
@@ -455,7 +457,8 @@ const char *x16tokens[]={
 	"BASLOAD",	/* 0xCE 0xBE */
 	"OVAL",		/* 0xCE 0xBF */
 	"RING",		/* 0xCE 0xC0 */
-	"",         /* 0xCE 0xC1 - 0xC 0xECF skipped in R48 */
+	"HBLOAD",	/* 0xCE 0xC1 */
+	"",			/* 0xCE 0xC2 - 0xCE 0xCF currently undefined */
 	"",
 	"",
 	"",
@@ -469,13 +472,13 @@ const char *x16tokens[]={
 	"",
 	"",
 	"",
-	"",
+	/* functions */
 	"VPEEK",	/* 0xCE 0xD0 */
 	"MX",		/* 0xCE 0xD1 */
 	"MY",		/* 0xCE 0xD2 */
 	"MB",		/* 0xCE 0xD3 */
 	"JOY",		/* 0xCE 0xD4 */
-	"HEX",		/* 0xCE 0xD5 */
+	"HEX$",		/* 0xCE 0xD5 */
 	"BIN$",		/* 0xCE 0xD6 */
 	"I2CPEEK",	/* 0xCE 0xD7 */
 	"POINTER",	/* 0xCE 0xD8 */

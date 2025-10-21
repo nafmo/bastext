@@ -135,7 +135,7 @@ int detokenize(const char *input_p, char *output_p, basic_t mode, int strict)
 				//*****************************************************//
 				} /* else */
 				else if (*ch_p == 0xCE &&
-				         ((*(ch_p + 1) >= 0x80 && *(ch_p + 1) <= 0xC0) ||
+				         ((*(ch_p + 1) >= 0x80 && *(ch_p + 1) <= 0xC1) ||
 				          (*(ch_p + 1) >= 0xD0 && *(ch_p + 1) <= 0xDD)) &&
 				          (X16 == mode)) {
 					/* X16 CE prefix */
