@@ -45,16 +45,6 @@ by
 .I Riska BV's The Final Cartridge III for Commodore 64
 .PP
 .I Rick Simon's BASIC 7.1 for Commodore 128
-.PP
-.I VIC Super Extender for VIC-20
-.PP
-.I Turtle BASIC 1.0 for VIC-20
-.PP
-.I SpeechBASIC 2.7 for Commodore 64
-.PP
-.I AtBasic for Commodore 64
-.PP
-.I Simon's BASIC for Commodore 64
 .RE
 .PD
 .PP
@@ -73,7 +63,7 @@ written in hexadecimal):
 .I Commodore 64 BASIC 2.0
 .TP
 1001
-.I VIC-20 BASIC 2.0 (unexpanded VIC)
+.I Commodore 16/Plus 4 BASIC 3.5 (or unexpanded VIC-20 BASIC 2.0)
 .TP
 1201
 .I VIC-20 BASIC 2.0 (8K RAM expansion)
@@ -117,6 +107,15 @@ names being binary Commodore BASIC files, they are T64 archives.
 When in output mode, this means that instead of writing the
 binary Commodore BASIC files to files in the current directory,
 they will be written to a T64 archive named
+.TP
+.I \-x
+Enable Commander X16 BASIC support.
+This must be specified in input mode to properly detokenize Commander X16
+BASIC binary.
+In output mode, the tokx16 header will enable Commander X16 BASIC mode no
+matter which BASIC mode has been selected, but -x must be specifid if the
+text file uses a standard tok64 header.
+
 .B bastext.t64
 in the current directory.
 If the archive already exists, it will be appended to.
@@ -133,7 +132,7 @@ file.
 These modifiers are available only when in input mode:
 .TP
 .I \-a
-Convert all input files, not only those that have a \"recognized\"
+Convert all input files, not only those that have a "recognized"
 starting address.
 .TP
 .I \-s
@@ -159,6 +158,13 @@ console).
 .SS "OUTPUT MODE MODIFIERS"
 .PP
 These modifiers are available only when in output mode:
+.TP
+.I \-p
+Enable P00 (PC64 emulator container file) mode.
+The Commodore BASIC files are written to the current directory but get a
+PC64 container header written to them and a file extension of .p00 added.
+This parameter is ignored in input mode, as it will auto-detect the .p00
+container format.
 .TP
 .I \-2
 Force
@@ -265,6 +271,6 @@ This documentation covers version 1.1 of
 BASTEXT was written by Peter Krefting.
 If you have bug-reports or questions, mail them to peter@softwolves.pp.se
 .PP
-A Softwolves Software (tm) Release in 2023.
+A Softwolves Software (tm) Release in 2025.
 .PP
 This program is released under the GNU Public License.

@@ -30,11 +30,6 @@ this version of BasText:
 * Software Unlimited's Graphics52 for Commodore 64
 * Riska BV's The Final Cartridge III for Commodore 64
 * Rick Simon's BASIC 7.1 for Commodore 128
-* VIC Super Extender for VIC-20
-* Turtle BASIC 1.0 for VIC-20
-* SpeechBASIC 2.7 for Commodore 64
-* AtBasic for Commodore 64
-* Simon's BASIC for Commodore 64
 * Commander X16
 
 BasText tries to autodetect the Commodore BASIC dialect used in the file it
@@ -49,7 +44,7 @@ VIC-20 BASIC 2.0 (3K RAM expansion)
 Commodore 64 BASIC 2.0
 
     $1001
-VIC-20 BASIC 2.0 (unexpanded VIC)
+Commodore 16/Plus 4 BASIC 3.5 (or unexpanded VIC-20 BASIC 2.0)
 
     $1201
 VIC-20 BASIC 2.0 (8K RAM expansion)
@@ -68,8 +63,9 @@ Commodore 128 BASIC 7.0
 Commodore 128 BASIC 7.0 saved with graphics mode enabled.
 
 In version 1.0, some different third-party extensions were included in the
-autodetection. This is not true anymore, and thus you'll need to specify all
-extensions via command line parameters.
+autodetection. This is now only true for input mode (binary-to-text), for
+output mode (text-to-binary) you'll need to specify all extensions via
+command line parameters.
 
 The text files created by this program are supposed to be compatible with
 those of tok64, meaning that the files it creates should be possible to
