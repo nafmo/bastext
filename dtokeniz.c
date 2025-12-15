@@ -152,8 +152,8 @@ int detokenize(const char *input_p, char *output_p, basic_t mode, int strict)
 					output_p += sprintf(output_p, "%s",
 					                    c128FEtokens[*ch_p]);
 				} /* else */
-				else if (Basic7 == mode || Basic71 == mode) {
-					/* C128 BASIC 7.0 */
+				else if (Basic35 == mode || Basic7 == mode || Basic71 == mode) {
+					/* Commodore 16/Plus4 BASIC 3.5 or C128 BASIC 7.0 */
 					output_p += sprintf(output_p, "%s",
 					                    c128tokens[*ch_p - 204]);
 				} /* else */

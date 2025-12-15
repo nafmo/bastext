@@ -21,7 +21,8 @@ basic_t selectbasic(int adr)
 	 *          TFC3 is the super-set, select it
 	 *          NB! Commander X16 BASIC also uses 0801, but
 	 *          must use the -x option.
-	 *  1001 => BASIC 2.0 (VIC20 unexpanded)
+	 *  1001 => BASIC 2.0 (VIC20 unexpanded) or BASIC 3.5 (C16/Plus4)
+	 *          BASIC 3.5 is the superset
 	 *  1201 => BASIC 2.0 (VIC20 +8K RAM)
 	 *  132D => BASIC 7.1 (C128) with bound extension file
 	 *  1C01 => BASIC 7.0 (C128) or BASIC 7.1 (C128)
@@ -37,6 +38,8 @@ basic_t selectbasic(int adr)
 			return TFC3;
 
 		case 0x1001:
+			return Basic35;
+
 		case 0x1201:
 			return Basic2;
 
