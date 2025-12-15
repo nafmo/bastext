@@ -30,6 +30,7 @@ this version of BasText:
 * Software Unlimited's Graphics52 for Commodore 64
 * Riska BV's The Final Cartridge III for Commodore 64
 * Rick Simon's BASIC 7.1 for Commodore 128
+* VIC Super Expander for VIC-20
 * Commander X16
 
 BasText tries to autodetect the Commodore BASIC dialect used in the file it
@@ -132,6 +133,11 @@ mode to properly detokenize Commander X16 BASIC binary. In output mode,
 the tokx16 header will enable Commander X16 BASIC mode no matter
 which BASIC mode has been selected, but -x must be specifid if the
 text file uses a standard tok64 header.
+
+    -e
+Enable VIC-20 Super Expander support. This must be specified both in
+input and output mode, as bastext for compatibility reasons selects
+the Commodore 64 Graphics52 expansion by default.
 
 These modifiers are available only when in input mode:
 

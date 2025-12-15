@@ -45,6 +45,8 @@ by
 .I Riska BV's The Final Cartridge III for Commodore 64
 .PP
 .I Rick Simon's BASIC 7.1 for Commodore 128
+.PP
+.I VIC Super Expander for VIC-20
 .RE
 .PD
 .PP
@@ -115,6 +117,12 @@ BASIC binary.
 In output mode, the tokx16 header will enable Commander X16 BASIC mode no
 matter which BASIC mode has been selected, but -x must be specifid if the
 text file uses a standard tok64 header.
+.TP
+.I \-e
+Enable VIC-20 Super Expander support.
+This must be specified both in input and output mode, as bastext for
+compatibility reasons selects the Commodore 64 Graphics52 expansion by
+default.
 
 .B bastext.t64
 in the current directory.

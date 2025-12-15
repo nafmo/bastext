@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
 	 *  5 (G52)  - force Graphics52 BASIC    >- out mode only,
 	 *  7 (7.0)  - force BASIC 7.0          /   if not specified, looks at
 	 *  1 (7.1)  - force BASIC 7.1        -/    "start bastext" header
+	 *  e (Exp)  - force VIC20 SuperExpander
 	 *  x (x16)  - force X16 BASIC (r48)
 	 *  a (all)  - convert all programs, not only those with recognized start
 	 *             address (0401/0801/1001/1201/132D/1C01/4001)
@@ -66,7 +67,7 @@ int main(int argc, char *argv[])
 	 *  h (help) - print help page
 	 *  ? (help)
 	 */
-	while (-1 != (option = getopt(argc, argv, "iotp23571xasd:h?"))) {
+	while (-1 != (option = getopt(argc, argv, "iotp23571exasd:h?"))) {
 		switch (option) {
 			case 'i':
 				mode = In;
@@ -102,6 +103,10 @@ int main(int argc, char *argv[])
 
 			case '1':
 				force = Basic71;
+				break;
+
+			case 'e':
+				force = VicSuper;
 				break;
 
 			case 'x':
@@ -166,8 +171,20 @@ int main(int argc, char *argv[])
 
 		switch (mode) {
 			case In:
-				if (t64mode)	t642txt(argv[i], output, allfiles, strict, force == X16);
-				else			bas2txt(argv[i], output, allfiles, strict, force == X16);
+				switch (force) {
+					/* Only X16 and VIC-20 SuperExpander mode can be forced
+					 * in input mode; we might want to change that in the
+					 * future, though */
+					case X16:
+					case VicSuper:
+						break;
+
+					default:
+						force = Any;
+						break;
+				}
+				if (t64mode)	t642txt(argv[i], output, allfiles, strict, force);
+				else			bas2txt(argv[i], output, allfiles, strict, force);
 				break;
 
 			case Out:
@@ -188,8 +205,8 @@ void helpscreen(const char *progname)
 {
 	fprintf(stderr,
 	        "Usage:\n"
-	        "  %s " SWITCH "i [" SWITCH "t] [" SWITCH "x] [" SWITCH "a] [" SWITCH "s] [" SWITCH "d filename] filename(s)\n"
-	        "  %s " SWITCH "o [" SWITCH "t|" SWITCH "p] [" SWITCH "2|" SWITCH "3|" SWITCH "4|" SWITCH "5|" SWITCH "7|" SWITCH "1|" SWITCH "x] filename(s)\n"
+	        "  %s " SWITCH "i [" SWITCH "t] [" SWITCH "e|" SWITCH "x] [" SWITCH "a] [" SWITCH "s] [" SWITCH "d filename] filename(s)\n"
+	        "  %s " SWITCH "o [" SWITCH "t|" SWITCH "p] [" SWITCH "2|" SWITCH "3|" SWITCH "4|" SWITCH "5|" SWITCH "7|" SWITCH "1|" SWITCH "e|" SWITCH "x] filename(s)\n"
 	        "  %s " SWITCH "h\n"
 	        "\n Mode (one of these required):\n"
 	        "  " SWITCH "i\tInput mode (binary to text)\n"
@@ -199,6 +216,7 @@ void helpscreen(const char *progname)
 	        "  " SWITCH "t\tT64 mode (in: reads from specified T64 archive(s)\n"
 	        "    \t          out: creates/appends to bastext.t64)\n"
 	        "  " SWITCH "x\tEnable Commander X16 BASIC support\n"
+	        "  " SWITCH "e\tForce VIC-20 SuperExpander BASIC interpretation\n"
 	        "\n Input mode modfiers:\n"
 	        "  " SWITCH "a\tConvert all, not just recognized start addresses\n"
 	        "    \t (0401/0801/1001/1201/132D/1C01/4001)\n"

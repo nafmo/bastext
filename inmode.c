@@ -14,17 +14,17 @@
 #define FALSE 0
 #define TRUE 1
 
-void inconvert(FILE *, FILE *, const char *, int, int, int, int);
+void inconvert(FILE *, FILE *, const char *, int, int, int, basic_t);
 
 /* bas2txt
  * - converts a binary file into a text file
  * in:	infile - file name of file to read
  *		allfiles - flag whether or not to convert "non-BASIC" files
  *		strict - flag for using strict tok64 compatibility
- *      x16enable - enable Commander X16 BASIC
+ *      force - enforced BASIC mode (X16 or VicSuper)
  * out:	none
  */
-void bas2txt(const char *infile, FILE *output, int allfiles, int strict, int x16enable)
+void bas2txt(const char *infile, FILE *output, int allfiles, int strict, basic_t force)
 {
 	FILE		*input;
 	const char	*title_p;
@@ -86,13 +86,13 @@ void bas2txt(const char *infile, FILE *output, int allfiles, int strict, int x16
 	}
 
 	/* Now convert the file to text */
-	inconvert(input, output, title_p, adr, allfiles, strict, x16enable);
+	inconvert(input, output, title_p, adr, allfiles, strict, force);
 
 	/* Close files */
 	fclose(input);
 }
 
-void t642txt(const char *infile, FILE *output, int allfiles, int strict, int x16enable)
+void t642txt(const char *infile, FILE *output, int allfiles, int strict, basic_t force)
 {
 	FILE			*input;
 	char			title[21], *c_p;
@@ -164,7 +164,7 @@ void t642txt(const char *infile, FILE *output, int allfiles, int strict, int x16
 
 			/* Now convert the file to text */
 			fprintf(stderr, "Converting: %s\n", title);
-			inconvert(input, output, title, adr, allfiles, strict, x16enable);
+			inconvert(input, output, title, adr, allfiles, strict, force);
 		}
 	}
 
@@ -179,11 +179,11 @@ void t642txt(const char *infile, FILE *output, int allfiles, int strict, int x16
  *		title - program title to print in header
  *		allfiles - flag whether or not to convert "non-BASIC" files
  *      strict - output in strict tok64 compatible mode
- *      x16enable - enable Commander X16 BASIC
+ *      force - enforced BASIC mode (X16 or VicSuper)
  * out:	none
  */
 void inconvert(FILE *input, FILE *output, const char *title, int adr,
-               int allfiles, int strict, int x16enable)
+               int allfiles, int strict, basic_t force)
 {
 	int		nextadr;
 	char	buf[256], text[512];
@@ -193,8 +193,8 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
 	if (allfiles || 0x0401 == adr || 0x0801 == adr || 0x1001 == adr ||
 	    0x1201 == adr || 0x1c01 == adr ||
 	    0x4001 == adr || 0x132D == adr) {
-		if (x16enable) {
-			mode = X16;
+		if (force != Any) {
+			mode = force;
 		}
 		else {
 			mode = selectbasic(adr);

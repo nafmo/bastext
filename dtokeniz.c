@@ -157,6 +157,11 @@ int detokenize(const char *input_p, char *output_p, basic_t mode, int strict)
 					output_p += sprintf(output_p, "%s",
 					                    c128tokens[*ch_p - 204]);
 				} /* else */
+				else if (*ch_p <= 221 && VicSuper == mode) {
+					/* VIC-20 Super Expander */
+					output_p += sprintf(output_p, "%s",
+					                    supertokens[*ch_p - 204]);
+				}
 				else if (Graphics52 == mode) {
 					/* C64 Graphics52 */
 					output_p += sprintf(output_p, "%s",
