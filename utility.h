@@ -15,7 +15,7 @@
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 
-#ifdef __EMX__
+#if defined __EMX__ || defined _MSC_VER
 # define SWITCH "/"
 #else
 # define SWITCH "-"

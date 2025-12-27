@@ -12,7 +12,7 @@
 #define FALSE 0
 #define TRUE 1
 
-#ifdef __EMX__
+#if defined __EMX__ || defined _MSC_VER
 #define strcasecmp stricmp
 #define strncasecmp strnicmp
 #endif

@@ -1,0 +1,25 @@
+# Makefile for bastext for Windows -------------------------------------------
+OBJS=main.obj inmode.obj outmode.obj tokens.obj tokenize.obj dtokeniz.obj select.obj t64.obj utility.obj
+CFLAGS=/Wall
+RM=del
+
+# All targets ----------------------------------------------------------------
+all: bastext.exe
+
+# Main executable ------------------------------------------------------------
+bastext.exe: $(OBJS)
+	$(CC) $(OBJS) -o bastext.exe
+
+tokens.obj: tokens.c tokens.h
+tokenize.obj: tokenize.c tokenize.h tokens.h
+dtokeniz.obj: dtokeniz.c tokenize.h tokens.h
+main.obj: main.c inmode.h outmode.h tokenize.h
+inmode.obj: inmode.c tokenize.h version.h inmode.h select.h t64.h
+outmode.obj: outmode.c tokenize.h version.h outmode.h select.h t64.h
+select.obj: select.c select.h tokenize.h
+t64.obj: t64.c t64.h
+utility.obj: utility.c utility.h
+
+# Cleanup --------------------------------------------------------------------
+clean:
+	$(RM) bastext.exe core *.obj *~

@@ -1,2 +1,4 @@
 *.o
+*.obj
 bastext
+bastext.exe
