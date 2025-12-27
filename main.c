@@ -4,26 +4,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef __EMX__
-# include <getopt.h>
-#else
-# include <unistd.h>
-#endif
 
 #include "inmode.h"
 #include "outmode.h"
 #include "tokenize.h"
+#include "utility.h"
 
 #define TRUE 1
 #define FALSE 0
 
 typedef enum runmode_e { None, In, Out } runmode_t;
-
-#ifdef __EMX__
-# define SWITCH "/"
-#else
-# define SWITCH "-"
-#endif
 
 void helpscreen(const char *progname);
 
