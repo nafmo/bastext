@@ -14,13 +14,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-#if _POSIX_C_SOURCE >= 2 || _XOPEN_SOURCE
-#elif defined __EMX__
-#else
-#include "utility.h"
-
 #include <string.h>
 #include <stdio.h>
+
+#include "utility.h"
+#if _POSIX_C_SOURCE >= 2 || _XOPEN_SOURCE || defined __DARWIN_UNIX03
+#elif defined __EMX__
+#else
 
 int optind = 0;
 char *optarg = NULL;

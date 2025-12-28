@@ -23,7 +23,7 @@
 
 #ifdef __EMX__
 #include <getopt.h>
-#elif _POSIX_C_SOURCE >= 2 || _XOPEN_SOURCE
+#elif _POSIX_C_SOURCE >= 2 || _XOPEN_SOURCE || defined __DARWIN_UNIX03
 #include <unistd.h>
 #else
 /** Index to next non-option parameter. */
