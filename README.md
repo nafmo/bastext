@@ -1,7 +1,7 @@
 BasText - convert Commodore BASIC to text
 ==========================================
-Copyright 1997-2025 Peter Krefting.
-A Softwolves Software Release in 2025
+Copyright 1997-2026 Peter Krefting.
+A Softwolves Software Release in 2026
 
 http://www.softwolves.pp.se/sw/
 
@@ -94,8 +94,7 @@ big problems. If autodetection in this mode does not work, use one of the
 
 BasText is command line driven, with the following syntax:
 
-    bastext -i [-t] [-a] [-s] [-d filename] filename(s)
-    bastext -o [-t] [-2|-3|-5|-7|-1] filename(s)
+    bastext -i|-o [-f TYPE] [-b MODE] [-a] [-s] [-d filename] filename(s)
     bastext -h
 
 One of the three mode selectors must be given:
@@ -110,12 +109,10 @@ BASIC).
 
     -h
 Shows a brief help screen, with an overview of the available options.
-These general modifiers (works in both input and output modes) are
-available:
 
-These options apply to both input and output mode:
+The "-f" option selects the format of the input and output files:
 
-    -t
+    -f t64
 Enable T64 (Commodore 64 emulator tape archive) mode. When in input
 mode, this means that instead of the specified file names being binary
 Commodore BASIC files, they are T64 archives. When in output mode, this
@@ -127,22 +124,53 @@ file is 30 entries. If you try to add more files to it, the program
 will abort with an error message. The default directory size is
 controlled in the t64.h file.
 
-    -x
+    -f p00
+Enable P00 (PC64 emulator container file) mode. The Commodore BASIC
+files are written to the current directory but get a PC64 container
+header written to them and a file extension of .p00 added. This
+parameter is ignored in input mode, as it will auto-detect the .p00
+container format.
+
+The "-b" option selects the BASIC dialect to use; if not specified,
+the format is detected automatically, unless otherwise mentioned:
+
+    -b 2.0
+Force Commodore BASIC 2.0 interpretation of all programs.
+
+    -b 3.5
+Force Commodore C16/+4 BASIC 3.5 interpretation of all programs.
+
+    -b 7.0
+Force Commodore 128 BASIC 7.0 interpretation of all programs.
+
+    -b 7.1
+Force Commodore 128 BASIC 7.1 extension interpretation of all programs.
+
+    -b TFC3
+Force Commodore 64 The Final Cartridge III BASIC extension
+interpretation of all programs. (See also BUGS).
+
+    -b 52
+Force Commodore 64 Graphics52 BASIC extension interpretation of all
+programs.
+
+    -b X16
 Enable Commander X16 BASIC support. This must be specified in input
 mode to properly detokenize Commander X16 BASIC binary. In output mode,
 the tokx16 header will enable Commander X16 BASIC mode no matter
-which BASIC mode has been selected, but -x must be specifid if the
+which BASIC mode has been selected, but "-b X16" must be specified if the
 text file uses a standard tok64 header.
 
-    -e
+    -b Super
 Enable VIC-20 Super Expander support. This must be specified both in
 input and output mode, as bastext for compatibility reasons selects
 the Commodore 64 Graphics52 expansion by default.
 
-These modifiers are available only when in input mode:
+These options modify the behaviour of the conversion:
 
     -a
-Convert all input files, not only those that have a starting address.
+Convert all input files, not only those that have a starting address
+(input mode only).
 
     -s
 Maintain strict compatibility with tok64. This means that BasText's
@@ -157,32 +185,6 @@ The "strict" mode will not, however, undo the problems with tok64's
 Selects the filename to write the output to. If the filename is not
 given, or is given as "-", the listings will be output on the standard
 output device (normally the console).
-
-These modifiers are available only when in output mode:
-
-    -p
-Enable P00 (PC64 emulator container file) mode. The Commodore BASIC
-files are written to the current directory but get a PC64 container
-header written to them and a file extension of .p00 added. This
-parameter is ignored in input mode, as it will auto-detect the .p00
-container format.
-
-    -2
-Force Commodore BASIC 2.0 interpretation of all programs.
-
-    -3
-Force Commodore 64 The Final Cartridge III BASIC extension
-interpretation of all programs. (See also BUGS).
-
-    -5
-Force Commodore 64 Graphics52 BASIC extension interpretation of all
-programs.
-
-    -7
-Force Commodore 128 BASIC 7.0 interpretation of all programs.
-
-    -1
-Force Commodore 128 BASIC 7.1 extension interpretation of all programs.
 
 Please note that the MS-DOS and OS/2 versions (EMX compiled) uses / (slash)
 as parameter character.
@@ -205,12 +207,12 @@ Converts all Commodore BASIC binary files with a prg extension to text,
 writing it to programs.txt in the current directory, while maintaining tok64
 compatibility.
 
-    bastext -it *.t64 | more
+    bastext -ift64 *.t64 | more
 
 Converts all files in all T64 archives (with filename suffix .t64) in the
 current directory into listings, displaying them one page at a time.
 
-    bastext -o7 programs.txt
+    bastext -ob7.0 programs.txt
 
 Converts all programs in the programs.txt text file into Commodore BASIC 7.0
 programs.
@@ -224,6 +226,7 @@ HISTORY
   Fix incorrect keyboard mapping.
   Fix VICE compatibility.
 * v1.2 - unreleased -
+  Simplify parameter parsing.
   Add support for reading and writing P00 archives.
   Add Commander X16 tokens.
   Fix Graphics52 tokenizer.

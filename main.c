@@ -13,6 +13,10 @@
 #define TRUE 1
 #define FALSE 0
 
+#if defined __EMX__ || defined _MSC_VER
+#define strcasecmp stricmp
+#endif
+
 typedef enum runmode_e { None, In, Out } runmode_t;
 
 void helpscreen(const char *progname);
@@ -38,26 +42,35 @@ int main(int argc, char *argv[])
 	optswchar = SWITCH;
 #endif
 
-	/* Recognized options:
+	/* Operation modes:
 	 *  i (in)   - convert from binary to text
 	 *  o (out)  - convert from text to binary
-	 *  t (t64)  - T64 mode
-	 *  p (p00)  - P00 mode (out mode only; autodetected in in mode)
-	 *  2 (2.0)  - force BASIC 2.0        -\
-	 *  3 (TFC3) - force TFC3 BASIC         \
-	 *  5 (G52)  - force Graphics52 BASIC    >- out mode only,
-	 *  7 (7.0)  - force BASIC 7.0          /   if not specified, looks at
-	 *  1 (7.1)  - force BASIC 7.1        -/    "start bastext" header
-	 *  e (Exp)  - force VIC20 SuperExpander
-	 *  x (x16)  - force X16 BASIC (r48)
-	 *  a (all)  - convert all programs, not only those with recognized start
-	 *             address (0401/0801/1001/1201/132D/1C01/4001)
-	 *  s (strict)-strict tok64 encoding
-	 *  d (dest) - gives destination filename (followed by filename)
 	 *  h (help) - print help page
+	 *
+	 * File format:
+	 *  f (format) - select format for input/output file:
+	 *    -f t64 - T64 mode   (legacy: -t)
+	 *    -d p00 - P00 mode (out mode only; autodetecet in in mode)
+	 *
+	 * Source format:
+	 *  b (basic) - force BASIC mode
+	 *    -b 2.0   - BASIC 2.0  (legacy: -2)
+	 *    -b 3.5   - BASIC 3.5
+	 *    -b 7.0   - BASIC 7.0  (legacy: -7)
+	 *    -b 7.1   - BASIC 7.1  (legacy: -1)
+	 *    -b 52    - Graphics53 (legacy: -5)
+	 *    -b TFC3  - TFC 3      (legacy: -3)
+	 *    -b X16   - X16 BASIC
+	 *    -b Super - VIC-20 SuperExpander
+	 *
+	 * Modifiers:
+	 *  a (all)    - convert all programs, not only those with recognized start
+	 *               address (0401/0801/1001/1201/132D/1C01/4001)
+	 *  s (strict) - strict tok64 encoding
+	 *  d (dest)   - destination filename
 	 *  ? (help)
 	 */
-	while (-1 != (option = getopt(argc, argv, "iotp23571exasd:h?"))) {
+	while (-1 != (option = getopt(argc, argv, "iohf:b:asdt23571:?"))) {
 		switch (option) {
 			case 'i':
 				mode = In;
@@ -67,40 +80,49 @@ int main(int argc, char *argv[])
 				mode = Out;
 				break;
 
+			case 'f':
+				if (0 == strcasecmp(optarg, "t64")) {
 			case 't':
-				t64mode = TRUE;
+					t64mode = TRUE;
+					p00mode = FALSE;
+				}
+				else if (0 == strcasecmp(optarg, "p00")) {
+					t64mode = FALSE;
+					p00mode = TRUE;
+				}
 				break;
 
-			case 'p':
-				p00mode = TRUE;
-				break;
-
+			case 'b':
+				if (0 == strcmp(optarg, "2.0")) {
 			case '2':
-				force = Basic2;
-				break;
-
-			case '3':
-				force = TFC3;
-				break;
-
-			case '5':
-				force = Graphics52;
-				break;
-
+					force = Basic2;
+					break;
+				}
+				else if (0 == strcmp(optarg, "3.5")) {
+					force = Basic35;
+				}
+				else if (0 == strcmp(optarg, "7.0")) {
 			case '7':
-				force = Basic7;
-				break;
-
+					force = Basic7;
+				}
+				else if (0 == strcmp(optarg, "7.1")) {
 			case '1':
-				force = Basic71;
-				break;
-
-			case 'e':
-				force = VicSuper;
-				break;
-
-			case 'x':
-				force = X16;
+					force = Basic71;
+				}
+				else if (0 == strcmp(optarg, "52")) {
+			case '5':
+					force = Graphics52;
+				}
+				else if (0 == strcasecmp(optarg, "TFC3")) {
+			case '3':
+					force = TFC3;
+				}
+				else if (0 == strcasecmp(optarg, "Super")) {
+					force = VicSuper;
+				}
+				else if (0 == strcasecmp(optarg, "X16")) {
+					force = X16;
+				}
 				break;
 
 			case 'a':
@@ -195,31 +217,30 @@ void helpscreen(const char *progname)
 {
 	fprintf(stderr,
 	        "Usage:\n"
-	        "  %s " SWITCH "i [" SWITCH "t] [" SWITCH "e|" SWITCH "x] [" SWITCH "a] [" SWITCH "s] [" SWITCH "d filename] filename(s)\n"
-	        "  %s " SWITCH "o [" SWITCH "t|" SWITCH "p] [" SWITCH "2|" SWITCH "3|" SWITCH "4|" SWITCH "5|" SWITCH "7|" SWITCH "1|" SWITCH "e|" SWITCH "x] filename(s)\n"
+	        "  %s " SWITCH "i|" SWITCH "o [" SWITCH "f TYPE] [" SWITCH "b MODE] [" SWITCH "a] [" SWITCH "s] [" SWITCH "d filename] filename(s)\n"
 	        "  %s " SWITCH "h\n"
 	        "\n Mode (one of these required):\n"
 	        "  " SWITCH "i\tInput mode (binary to text)\n"
 	        "  " SWITCH "o\tOutput mode (text to binary)\n"
 	        "  " SWITCH "h\tPrint help page\n"
-	        "\n General modfiers:\n"
-	        "  " SWITCH "t\tT64 mode (in: reads from specified T64 archive(s)\n"
+	        "\n File format selection:\n"
+	        "  " SWITCH "ft64\tT64 mode (in: reads from specified T64 archive(s)\n"
 	        "    \t          out: creates/appends to bastext.t64)\n"
-	        "  " SWITCH "x\tEnable Commander X16 BASIC support\n"
-	        "  " SWITCH "e\tForce VIC-20 SuperExpander BASIC interpretation\n"
-	        "\n Input mode modfiers:\n"
+	        "  " SWITCH "fp00\tP00 mode (out: wraps output in .p00 container)\n"
+	        "\n BASIC dialect selection:\n"
+	        "  " SWITCH "b2.0\tForce C64 BASIC 2.0 interpretation\n"
+	        "  " SWITCH "b3.5\tForce C16/+4 BASIC 3.5 interpretation\n"
+	        "  " SWITCH "b7.0\tForce C128 BASIC 7.0 interpretation\n"
+	        "  " SWITCH "b7.1\tForce C128 BASIC 7.1 interpretation\n"
+	        "  " SWITCH "bTFC3\n\tForce C64 TFC3 interpretation\n"
+	        "  " SWITCH "b52\tForce C64 Graphics52 interpretation\n"
+	        "  " SWITCH "bX16\tEnable Commander X16 BASIC support\n"
+	        "  " SWITCH "bSuper\n\tForce VIC-20 SuperExpander BASIC interpretation\n"
+	        "\n Behavioural options:\n"
 	        "  " SWITCH "a\tConvert all, not just recognized start addresses\n"
 	        "    \t (0401/0801/1001/1201/132D/1C01/4001)\n"
 	        "  " SWITCH "s\tStrict tok64 compatibility\n"
-	        "  " SWITCH "d fn\tSend output to file fn\n"
-	        "\n Output mode modifiers:\n"
-	        "  " SWITCH "p\tP00 mode (out: wraps output in .p00 container)\n"
-	        "  " SWITCH "2\tForce C64 BASIC 2.0 interpretation\n"
-	        "  " SWITCH "3\tForce C64 TFC3 interpretation\n"
-	        "  " SWITCH "5\tForce C64 Graphics52 interpretation\n"
-	        "  " SWITCH "7\tForce C128 BASIC 7.0 interpretation\n"
-	        "  " SWITCH "1\tForce C128 BASIC 7.1 interpretation\n",
-	        progname,
+	        "  " SWITCH "d fn\tSend output to file fn\n",
 	        progname,
 	        progname);
 }
