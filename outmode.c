@@ -160,6 +160,16 @@ void txt2bas(const char *infile, basic_t force, outmode_t outmode)
 					if (Any == force)	mode = Basic71;
 				}
 			}
+			else if (strncasecmp(text, "start tokpet ", 13) == 0) {
+				/* This is the header that starts the actual BASIC text */
+				foundheader = TRUE;
+
+				/* Retrieve the file name */
+				strcpy(filename, &text[13]);
+
+				/* This is always a Commodore PET BASIC 4.0 progrem */
+				mode = Basic4;
+			}
 			else if (strncasecmp(text, "start tokx16 ", 13) == 0) {
 				/* This is the header that starts the actual BASIC text */
 				foundheader = TRUE;

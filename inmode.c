@@ -215,6 +215,11 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
 			}
 			fprintf(output, "\nstart tok128 %s\n", title);
 		}
+		else if (Basic4 == mode) {
+			/* tok64 doesn't handle BASIC 4 programs, so ignore strict mode */
+			strict = FALSE;
+			fprintf(output, "\nstart tokpet %s\n", title);
+		}
 		else if (X16 == mode) {
 			/* tok64 doesn't handle X16 programs, so ignore strict mode */
 			strict = FALSE;

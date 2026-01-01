@@ -172,6 +172,11 @@ int detokenize(const char *input_p, char *output_p, basic_t mode, int strict)
 					output_p += sprintf(output_p, "%s",
 					                    tfc3tokens[*ch_p - 204]);
 				} /* else */
+				else if (*ch_p <= 227 && Basic4 == mode) {
+					/* PET BASIC 4.0 */
+					output_p += sprintf(output_p, "%s",
+					                    basic4tokens[*ch_p - 204]);
+				} /* else */
 				else {
 					/* Errorneous token */
 					output_p += sprintf(output_p, "{%d}", *ch_p);

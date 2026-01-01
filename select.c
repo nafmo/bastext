@@ -17,10 +17,12 @@ basic_t selectbasic(int adr)
 	 * BASIC version
 	 *  0401 => BASIC 2.0 (VIC20, +3K RAM) or Graphics52 (C64)
 	 *          Graphics52 is the super-set, select it
+	 *          NB! PET BASIC 4.0 also uses 0401, but must
+	 *          use the -b 4.0 option.
 	 *  0801 => BASIC 2.0 (C64) or TFC3 BASIC (C64)
 	 *          TFC3 is the super-set, select it
 	 *          NB! Commander X16 BASIC also uses 0801, but
-	 *          must use the -x option.
+	 *          must use the -b X16 option.
 	 *  1001 => BASIC 2.0 (VIC20 unexpanded) or BASIC 3.5 (C16/Plus4)
 	 *          BASIC 3.5 is the superset
 	 *  1201 => BASIC 2.0 (VIC20 +8K RAM)

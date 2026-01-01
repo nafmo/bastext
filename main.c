@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
 	 *  b (basic) - force BASIC mode
 	 *    -b 2.0   - BASIC 2.0  (legacy: -2)
 	 *    -b 3.5   - BASIC 3.5
+	 *    -b 4.0   - BASIC 4.0
 	 *    -b 7.0   - BASIC 7.0  (legacy: -7)
 	 *    -b 7.1   - BASIC 7.1  (legacy: -1)
 	 *    -b 52    - Graphics53 (legacy: -5)
@@ -101,6 +102,9 @@ int main(int argc, char *argv[])
 				else if (0 == strcmp(optarg, "3.5")) {
 					force = Basic35;
 				}
+				else if (0 == strcmp(optarg, "4.0")) {
+					force = Basic4;
+				}
 				else if (0 == strcmp(optarg, "7.0")) {
 			case '7':
 					force = Basic7;
@@ -122,6 +126,10 @@ int main(int argc, char *argv[])
 				}
 				else if (0 == strcasecmp(optarg, "X16")) {
 					force = X16;
+				}
+				else {
+					fprintf(stderr, "Unrecognized BASIC dialect: %s\n", optarg);
+					return 1;
 				}
 				break;
 
@@ -183,18 +191,6 @@ int main(int argc, char *argv[])
 
 		switch (mode) {
 			case In:
-				switch (force) {
-					/* Only X16 and VIC-20 SuperExpander mode can be forced
-					 * in input mode; we might want to change that in the
-					 * future, though */
-					case X16:
-					case VicSuper:
-						break;
-
-					default:
-						force = Any;
-						break;
-				}
 				if (t64mode)	t642txt(argv[i], output, allfiles, strict, force);
 				else			bas2txt(argv[i], output, allfiles, strict, force);
 				break;

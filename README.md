@@ -140,6 +140,13 @@ Force Commodore BASIC 2.0 interpretation of all programs.
     -b 3.5
 Force Commodore C16/+4 BASIC 3.5 interpretation of all programs.
 
+    -b 4.0
+Force Commodore PET BASIC 4.0 interpretation of all programs.
+This must be specified both in input mode, as these tokens are incompatible
+with the 3.5 and 7.0 tokens. In output mode, the tokpe theader will enable
+Commodore PET 4.0 mode, but "-b 4.0" must be specified if the text file uses
+a standard tok64 header.
+
     -b 7.0
 Force Commodore 128 BASIC 7.0 interpretation of all programs.
 

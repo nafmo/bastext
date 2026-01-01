@@ -147,6 +147,14 @@ interpretation of
 .I all
 programs.
 .TP
+.I \-b 4.0
+Force Commodore PET BASIC 4.0 interpretation of all programs.
+This must be specified both in input mode, as these tokens are incompatible
+with the 3.5 and 7.0 tokens. In output mode, the tokpe theader will enable
+Commodore PET 4.0 mode, but
+.I \-b 4.0
+must be specified if the text file uses a standard tok64 header.
+.TP
 .I \-b 7.0
 Force
 .I Commodore 128 BASIC 7.0
@@ -182,8 +190,9 @@ Enable Commander X16 BASIC support.
 This must be specified in input mode to properly detokenize Commander X16
 BASIC binary.
 In output mode, the tokx16 header will enable Commander X16 BASIC mode no
-matter which BASIC mode has been selected, but -x must be specifid if the
-text file uses a standard tok64 header.
+matter which BASIC mode has been selected, but
+.I \-b x16
+must be specified if the text file uses a standard tok64 header.
 .TP
 .I \-b Super
 Enable VIC-20 Super Expander support.
