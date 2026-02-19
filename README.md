@@ -193,8 +193,8 @@ Selects the filename to write the output to. If the filename is not
 given, or is given as "-", the listings will be output on the standard
 output device (normally the console).
 
-Please note that the MS-DOS and OS/2 versions (EMX compiled) uses / (slash)
-as parameter character.
+Please note that the MS-DOS and OS/2 versions (EMX compiled) and Windows
+versions (Visual C) uses / (slash) as parameter character.
 
 EXAMPLES
 ---------
@@ -237,6 +237,18 @@ HISTORY
   Add support for reading and writing P00 archives.
   Add Commander X16 tokens.
   Fix Graphics52 tokenizer.
+
+BUILDING
+--------
+
+To compile with GNU GCC and GNU make, it should be enough to just run "make"
+to generate binaries. The same goes for compiling with Clang on macOS
+(Xcode).
+
+To compile with Microsoft Visual C++ and NMAKE, run "NMAKE /F NMAKEFILE".
+
+Run "make clean" or "NMAKE /F NMAKEFILE clean" to remove the generated
+object files and binaries.
 
 KNOWN BUGS
 -----------
