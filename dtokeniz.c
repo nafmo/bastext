@@ -19,12 +19,12 @@
 /* detokenize
  * - detokenize a C64/C128 BASIC (in binary) line
  * in:	input_p - pointer to a bytestream to detokenize
- *		output_p - pointer to a string to put results in, MUST BE ALLOCATED
+ *		output - File to write the result to
  *      mode - BASIC version to detokenize
  *		strict - flag for using strict tok64 compatibility
  * out:	nonzero on error
  */
-int detokenize(const char *input_p, char *output_p, basic_t mode, int strict)
+int detokenize(const char *input_p, FILE *output, basic_t mode, int strict)
 {
 	int	quotemode = FALSE;		/* flag for quote mode */
 	unsigned short i;			/* loop counter */
@@ -43,7 +43,7 @@ int detokenize(const char *input_p, char *output_p, basic_t mode, int strict)
 	ch_p += 2;
 	
 	/* print it to the output string, and move the character pointer beyond */
-	output_p += sprintf(output_p, "%u ", linenumber);
+	fprintf(output, "%u ", linenumber);
 
 	/* Next comes a bytestream of line data, ending in a null character */
 	while (*ch_p) {
@@ -65,11 +65,11 @@ int detokenize(const char *input_p, char *output_p, basic_t mode, int strict)
 			 * Repetitions of " is not written (quotemode on/off)
 			 */
 			if (34 == *ch_p) {		/* quote */
-				*(output_p ++) = '\"';
+				fputc('\"', output);
 				quotemode = FALSE;	/* go out of quotemode */
 			} /* if */
 			else if (42 == *ch_p) {	/* asterisk */
-				*(output_p ++) = '*';
+				fputc('*', output);
 			} /* else */
 			else {
 				/* Check for special token (escape is multibyte) */
@@ -100,20 +100,20 @@ int detokenize(const char *input_p, char *output_p, basic_t mode, int strict)
 
 					/* We know the repetition number, now print it */
 					if (32 == *ch_p) {	/* space */
-						output_p += sprintf(output_p, "{space*%hd}", i);
+						fprintf(output, "{space*%hd}", i);
 					} /* if */
 					else {
-						output_p += sprintf(output_p, "{%s*%hd}", escape_p, i);
+						fprintf(output, "{%s*%hd}", escape_p, i);
 					} /* else */
 
 					ch_p += i - 1;	/* point to last repetition */
 				} /* if */
 				else {	/* not repetition */
 					if (isspecial) {
-						output_p += sprintf(output_p, "{%s}", escape_p);
+						fprintf(output, "{%s}", escape_p);
 					} /* if */
 					else {	/* normal character */
-						*(output_p ++) = *escape_p;
+						fputc(*escape_p, output);
 					} /* else */
 				} /* else */
 			} /* else */
@@ -122,16 +122,14 @@ int detokenize(const char *input_p, char *output_p, basic_t mode, int strict)
 			if (*ch_p >= 128 && *ch_p <= 254) {	/* Probable BASIC command */
 				if ((unsigned char) *ch_p <= 203) {
 					/* C64 BASIC 2.0 */
-					output_p += sprintf(output_p, "%s",
-					                    c64tokens[*ch_p - 128]);
+					fprintf(output, "%s", c64tokens[*ch_p - 128]);
 				} /* if */
 				else if (*ch_p == 0xCE &&
 				         (*(ch_p + 1) >= 2 && *(ch_p + 1) <= 0xA) &&
 				         (Basic7 == mode || Basic71 == mode)) {
 					/* C128 BASIC 7.0 CE prefix */
 					ch_p ++;
-					output_p += sprintf(output_p, "%s",
-					                    c128CEtokens[*ch_p]);
+					fprintf(output, "%s", c128CEtokens[*ch_p]);
 				//*****************************************************//
 				} /* else */
 				else if (*ch_p == 0xCE &&
@@ -140,8 +138,7 @@ int detokenize(const char *input_p, char *output_p, basic_t mode, int strict)
 				          (X16 == mode)) {
 					/* X16 CE prefix */
 					ch_p ++;
-					output_p += sprintf(output_p, "%s",
-					                    x16tokens[(*ch_p) - 0x80]);
+					fprintf(output, "%s", x16tokens[(*ch_p) - 0x80]);
 				//*****************************************************//
 				} /* else */
 				else if (*ch_p == 0xFE && *(ch_p + 1) >= 2 &&
@@ -149,37 +146,31 @@ int detokenize(const char *input_p, char *output_p, basic_t mode, int strict)
 				          (*(ch_p + 1) <= 0x37 && Basic71 == mode))) {
 					/* C128 BASIC 7.0/7.1 FE prefix */
 					ch_p ++;
-					output_p += sprintf(output_p, "%s",
-					                    c128FEtokens[*ch_p]);
+					fprintf(output, "%s", c128FEtokens[*ch_p]);
 				} /* else */
 				else if (Basic35 == mode || Basic7 == mode || Basic71 == mode) {
 					/* Commodore 16/Plus4 BASIC 3.5 or C128 BASIC 7.0 */
-					output_p += sprintf(output_p, "%s",
-					                    c128tokens[*ch_p - 204]);
+					fprintf(output, "%s", c128tokens[*ch_p - 204]);
 				} /* else */
 				else if (*ch_p <= 221 && VicSuper == mode) {
 					/* VIC-20 Super Expander */
-					output_p += sprintf(output_p, "%s",
-					                    supertokens[*ch_p - 204]);
+					fprintf(output, "%s", supertokens[*ch_p - 204]);
 				}
 				else if (Graphics52 == mode) {
 					/* C64 Graphics52 */
-					output_p += sprintf(output_p, "%s",
-					                    graphics52tokens[*ch_p - 204]);
+					fprintf(output, "%s", graphics52tokens[*ch_p - 204]);
 				} /* else */
 				else if (*ch_p <= 232 && TFC3 == mode) {
 					/* C64 TFC3 */
-					output_p += sprintf(output_p, "%s",
-					                    tfc3tokens[*ch_p - 204]);
+					fprintf(output, "%s", tfc3tokens[*ch_p - 204]);
 				} /* else */
 				else if (*ch_p <= 227 && Basic4 == mode) {
 					/* PET BASIC 4.0 */
-					output_p += sprintf(output_p, "%s",
-					                    basic4tokens[*ch_p - 204]);
+					fprintf(output, "%s", basic4tokens[*ch_p - 204]);
 				} /* else */
 				else {
 					/* Errorneous token */
-					output_p += sprintf(output_p, "{%d}", *ch_p);
+					fprintf(output, "{%d}", *ch_p);
 				}
 				
 			} /* if */
@@ -193,16 +184,16 @@ int detokenize(const char *input_p, char *output_p, basic_t mode, int strict)
 				 */
 				if ((*ch_p >= 32 && *ch_p <= 64) ||	/* ' ' - '@', */
 				    91 == *ch_p || 93 == *ch_p) {		/* '[', ']' */
-					*(output_p ++) = *ch_p;
+					fputc(*ch_p, output);
 					if (34 == *ch_p) {
 						quotemode = TRUE;		/* go to quotemode */
 					} /* if */
 				} /* if */
 				else if (*ch_p >= 65 && *ch_p <= 90) {	/* 'A' - 'Z' */
-					*(output_p ++) = tolower(*ch_p);
+					fputc(tolower(*ch_p), output);
 				} /* else */
 				else {	/* Possibly illegal character, write petscii escape */
-					output_p += sprintf(output_p, "{%s}", escape_p);
+					fprintf(output, "{%s}", escape_p);
 				} /* else */
 			} /* else */
 		} /* else */
@@ -210,7 +201,7 @@ int detokenize(const char *input_p, char *output_p, basic_t mode, int strict)
 		ch_p ++;				/* next character */
 	} /* while */
 
-	*output_p = 0;
+	fputc('\n', output);
 
 	return rc;
 }

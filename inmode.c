@@ -186,7 +186,7 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
                int allfiles, int strict, basic_t force)
 {
 	int		nextadr;
-	char	buf[256], text[512];
+	char	buf[256];
 	basic_t	mode;
 
 	/* Check for valid BASIC file */
@@ -259,11 +259,7 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
 			adr = nextadr;
 
 			/* Convert to text */
-			detokenize(buf, text, mode, strict);
-
-			/* Write to output */
-			fputs(text, output);
-			fputc('\n', output);
+			detokenize(buf, output, mode, strict);
 
 			/* Read address to next line */
 			nextadr = fgetc(input);			/* low byte */
