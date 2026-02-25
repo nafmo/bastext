@@ -757,9 +757,9 @@ const char *petscii[] = {
  * - checks whether a token that is to be used is tok64 compatible or not
  *   (for strict mode)
  * in:	petscii - petscii character value
- * out:	TRUE / FALSE
+ * out:	true / false
  */
-int nontok64compatible(int petscii)
+bool nontok64compatible(int petscii)
 {
 	return (   (petscii >=   1 && petscii <=   4)
 	        || (petscii >=   6 && petscii <=  16)

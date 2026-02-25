@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 
 /* Structure definitions for the T64 archive format.
  * NB: The structures are written here to be useable without knowing whether
@@ -14,10 +15,10 @@
 /* T64 archive header, 64 bytes */
 typedef struct t64header_s {
 	char			description[32];	/* "C64 tape image"+EOF+nulls */
-	unsigned char	version[2];			/* $00 / $01 (=$0100) */
-	unsigned char	maxfiles[2];		/* word */
-	unsigned char	numfiles[2];		/* word */
-	unsigned char	reserved[2];
+	uint8_t			version[2];			/* $00 / $01 (=$0100) */
+	uint8_t			maxfiles[2];		/* word */
+	uint8_t			numfiles[2];		/* word */
+	uint8_t			reserved[2];
 	char			title[24];			/* Title (PETSCII), space padded */
 } t64header_t;
 
@@ -27,13 +28,13 @@ typedef struct t64header_s {
 
 /* T64 file record */
 typedef struct t64record_s {
-	unsigned char	allocflag;			/* 0 = free, 1 = normal, 2.. = others */
-	unsigned char	filetype;			/* Filetype (1 = program) / 2ndry address? */
-	unsigned char	startaddress[2];	/* Start address of C64 file */
-	unsigned char	endaddress[2];		/* Ending address of C64 file */
-	unsigned char	reserved1[2];
-	unsigned char	offset[4];			/* Start address in T64 */
-	unsigned char	reserved2[4];
+	uint8_t			allocflag;			/* 0 = free, 1 = normal, 2.. = others */
+	uint8_t			filetype;			/* Filetype (1 = program) / 2ndry address? */
+	uint8_t			startaddress[2];	/* Start address of C64 file */
+	uint8_t			endaddress[2];		/* Ending address of C64 file */
+	uint8_t			reserved1[2];
+	uint8_t			offset[4];			/* Start address in T64 */
+	uint8_t			reserved2[4];
 	char			filename[16];		/* Filename (PETSCII), space padded */
 } t64record_t;
 

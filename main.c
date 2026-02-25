@@ -4,14 +4,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "inmode.h"
 #include "outmode.h"
 #include "tokenize.h"
 #include "utility.h"
-
-#define TRUE 1
-#define FALSE 0
 
 #if defined __EMX__ || defined _MSC_VER
 #define strcasecmp stricmp
@@ -28,10 +26,10 @@ void helpscreen(const char *progname);
 int main(int argc, char *argv[])
 {
 	int			option, i;
-	int			allfiles = FALSE;
-	int			t64mode = FALSE;
-	int			p00mode = FALSE;
-	int			strict = FALSE;
+	bool		allfiles = false;
+	bool		t64mode = false;
+	bool		p00mode = false;
+	bool		strict = false;
 	runmode_t	mode = None;
 	basic_t		force = Any;
 	char		*outfile = "-";
@@ -84,12 +82,12 @@ int main(int argc, char *argv[])
 			case 'f':
 				if (0 == strcasecmp(optarg, "t64")) {
 			case 't':
-					t64mode = TRUE;
-					p00mode = FALSE;
+					t64mode = true;
+					p00mode = false;
 				}
 				else if (0 == strcasecmp(optarg, "p00")) {
-					t64mode = FALSE;
-					p00mode = TRUE;
+					t64mode = false;
+					p00mode = true;
 				}
 				break;
 
@@ -134,11 +132,11 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'a':
-				allfiles = TRUE;
+				allfiles = true;
 				break;
 
 			case 's':
-				strict = TRUE;
+				strict = true;
 				break;
 
 			case 'd':

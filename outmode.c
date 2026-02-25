@@ -5,15 +5,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "outmode.h"
 #include "tokenize.h"
 #include "version.h"
 #include "t64.h"
 #include "p00.h"
 #include "select.h"
-
-#define FALSE 0
-#define TRUE 1
 
 #if defined __EMX__ || defined _MSC_VER
 #define strncasecmp strnicmp
@@ -35,8 +33,8 @@ void txt2bas(const char *infile, basic_t force, outmode_t outmode)
 	int				adr;
 	basic_t			mode;
 	char			text[256], filename[256], *c_p;
-	int				morefiles = TRUE;
-	int				foundheader, foundextraheader;
+	bool			morefiles = true;
+	bool			foundheader, foundextraheader;
 	t64header_t		header;
 	t64record_t		record;
 	p00header_t		p00header;
@@ -105,8 +103,8 @@ void txt2bas(const char *infile, basic_t force, outmode_t outmode)
 		                      : force;		/* default BASIC mode */
 
 		/* Locate the bastext/tok64 headers */
-		foundextraheader = FALSE;
-		foundheader = FALSE;
+		foundextraheader = false;
+		foundheader = false;
 		while (!foundheader && NULL != fgets(text, sizeof(text), input)) {
 			/* Remove the trailing newline marker that fgets stuck there */
 			text[sizeof(text) - 1] = 0;		/* if buffer was full */
@@ -134,18 +132,18 @@ void txt2bas(const char *infile, basic_t force, outmode_t outmode)
 				 */
 				if (0x132D == adr)	adr = 0x1C01;
 
-				foundextraheader = TRUE;
+				foundextraheader = true;
 			}
 			else if (strncasecmp(text, "start tok64 ", 12) == 0) {
 				/* This is the header that starts the actual BASIC text */
-				foundheader = TRUE;
+				foundheader = true;
 
 				/* Retrieve the file name */
 				strcpy(filename, &text[12]);
 			}
 			else if (strncasecmp(text, "start tok128 ", 13) == 0) {
 				/* This is the header that starts the actual BASIC text */
-				foundheader = TRUE;
+				foundheader = true;
 
 				/* Retrieve the file name */
 				strcpy(filename, &text[13]);
@@ -162,7 +160,7 @@ void txt2bas(const char *infile, basic_t force, outmode_t outmode)
 			}
 			else if (strncasecmp(text, "start tokpet ", 13) == 0) {
 				/* This is the header that starts the actual BASIC text */
-				foundheader = TRUE;
+				foundheader = true;
 
 				/* Retrieve the file name */
 				strcpy(filename, &text[13]);
@@ -172,7 +170,7 @@ void txt2bas(const char *infile, basic_t force, outmode_t outmode)
 			}
 			else if (strncasecmp(text, "start tokx16 ", 13) == 0) {
 				/* This is the header that starts the actual BASIC text */
-				foundheader = TRUE;
+				foundheader = true;
 
 				/* Retrieve the file name */
 				strcpy(filename, &text[13]);
@@ -181,7 +179,7 @@ void txt2bas(const char *infile, basic_t force, outmode_t outmode)
 				mode = X16;
 			}
 		}
-		
+
 		if (foundheader) {
 			/* A header was found, write a message and open a file
 			 * (in T64 mode: create dir entry)
@@ -201,8 +199,8 @@ void txt2bas(const char *infile, basic_t force, outmode_t outmode)
 				memset(&record, 0, sizeof(record));
 				record.allocflag = ALLOC_NORM;
 				record.filetype = 1; /* 0x82? */		/* PRG */
-				record.startaddress[0] = adr & 0xFF;	/* low */
-				record.startaddress[1] = adr >> 8;		/* high */
+				record.startaddress[0] = (uint8_t) (adr & 0xFF);	/* low */
+				record.startaddress[1] = (uint8_t) (adr >> 8);		/* high */
 				make_petscii_name(record.filename, filename, ' ');
 
 				/* Seek to end of file, and enter start offset into the
@@ -266,8 +264,8 @@ void txt2bas(const char *infile, basic_t force, outmode_t outmode)
 
 				/* Update the T64 header */
 				usedentries ++;
-				header.numfiles[0] = usedentries & 0xFF;	/* low */
-				header.numfiles[1] = usedentries >> 8;		/* high */
+				header.numfiles[0] = (uint8_t) (usedentries & 0xFF);	/* low */
+				header.numfiles[1] = (uint8_t) (usedentries >> 8);		/* high */
 				fseek(output, (long) ((t64header_t *) NULL)->numfiles,
 				      SEEK_SET);
 				fwrite(&header.numfiles, sizeof(header.numfiles),
@@ -280,7 +278,7 @@ void txt2bas(const char *infile, basic_t force, outmode_t outmode)
 		}
 		else {
 			/* If we get here, we have reached EOF */
-			morefiles = FALSE;
+			morefiles = false;
 		}
 	}
 
@@ -303,8 +301,8 @@ void txt2bas(const char *infile, basic_t force, outmode_t outmode)
  */
 int outconvert(FILE *input, FILE *output, int adr, basic_t mode)
 {
-	char		text[512], buf[256];
-	int			goon = TRUE;
+	char		text[512];
+	bool		goon = true;
 	int			linelength;
 	unsigned	errors = 0;
 
@@ -324,6 +322,7 @@ int outconvert(FILE *input, FILE *output, int adr, basic_t mode)
 		/* Check for trailing backslash (line continuation) */
 		while ('\\' == text[strlen(text) - 1]) {
 			char	*c_p;
+			char	buf[256];
 
 			/* Remove the backslash */
 			text[strlen(text) - 1] = 0;
@@ -355,9 +354,11 @@ int outconvert(FILE *input, FILE *output, int adr, basic_t mode)
 
 		/* Check if "stop tok64/tok128" marker */
 		if (strncasecmp(text, "stop tok", 8) == 0) {
-			goon = FALSE;
+			goon = false;
 		}
 		else {
+			uint8_t		buf[256];
+
 			/* Tokenize */
 			if (tokenize(text, buf, &linelength, mode)) {
 				errors ++;		/* error if nonzero */
@@ -375,6 +376,8 @@ int outconvert(FILE *input, FILE *output, int adr, basic_t mode)
 
 	/* If we had errors while interpreting the source, say so */
 	if (errors) {
+		uint8_t		buf[256];
+
 		sprintf(text, "63999 REM\"%u errors in tokenization", errors);
 		tokenize(text, buf, &linelength, mode);
 

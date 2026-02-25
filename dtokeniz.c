@@ -4,12 +4,10 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <ctype.h>
 #include "tokenize.h"
 #include "tokens.h"
-
-#define FALSE 0
-#define TRUE 1
 
 /* The bytestream buffer used in the function (input) is from the line
  * number up to the ending null character. The "next line" pointer is
@@ -24,19 +22,19 @@
  *		strict - flag for using strict tok64 compatibility
  * out:	nonzero on error
  */
-int detokenize(const char *input_p, FILE *output, basic_t mode, int strict)
+int detokenize(const uint8_t *input_p, FILE *output, basic_t mode, int strict)
 {
-	int	quotemode = FALSE;		/* flag for quote mode */
+	bool quotemode = false;		/* flag for quote mode */
 	unsigned short i;			/* loop counter */
 	unsigned linenumber;		/* line number */
 	int rc = 0;					/* return code */
-	int isspecial;				/* flag for special characters */
-	const unsigned char *ch_p;	/* pointer moving over input */
+	bool isspecial;				/* flag for special characters */
+	const uint8_t *ch_p;		/* pointer moving over input */
 	const char *escape_p;		/* pointer to current escape sequence */
 	char numeric[4];			/* threedigit numeric escape for strict tok64
 								   compatibility */
 
-	ch_p = (const unsigned char*) input_p;
+	ch_p = input_p;
 
 	/* First two bytes is the line number as (low,high) */
 	linenumber = (*ch_p) | (*(ch_p + 1)) << 8;
@@ -66,7 +64,7 @@ int detokenize(const char *input_p, FILE *output, basic_t mode, int strict)
 			 */
 			if (34 == *ch_p) {		/* quote */
 				fputc('\"', output);
-				quotemode = FALSE;	/* go out of quotemode */
+				quotemode = false;	/* go out of quotemode */
 			} /* if */
 			else if (42 == *ch_p) {	/* asterisk */
 				fputc('*', output);
@@ -74,10 +72,10 @@ int detokenize(const char *input_p, FILE *output, basic_t mode, int strict)
 			else {
 				/* Check for special token (escape is multibyte) */
 				if (escape_p[1] == 0) {
-					isspecial = FALSE;
+					isspecial = false;
 				} /* if */
 				else {
-					isspecial = TRUE;
+					isspecial = true;
 				} /* else */
 
 				/* Check repetition if:
@@ -120,7 +118,7 @@ int detokenize(const char *input_p, FILE *output, basic_t mode, int strict)
 		} /* if */
 		else {					/* command mode */
 			if (*ch_p >= 128 && *ch_p <= 254) {	/* Probable BASIC command */
-				if ((unsigned char) *ch_p <= 203) {
+				if (*ch_p <= 203) {
 					/* C64 BASIC 2.0 */
 					fprintf(output, "%s", c64tokens[*ch_p - 128]);
 				} /* if */
@@ -186,7 +184,7 @@ int detokenize(const char *input_p, FILE *output, basic_t mode, int strict)
 				    91 == *ch_p || 93 == *ch_p) {		/* '[', ']' */
 					fputc(*ch_p, output);
 					if (34 == *ch_p) {
-						quotemode = TRUE;		/* go to quotemode */
+						quotemode = true;		/* go to quotemode */
 					} /* if */
 				} /* if */
 				else if (*ch_p >= 65 && *ch_p <= 90) {	/* 'A' - 'Z' */

@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 
 /* Structure definitions for the P00 container.
  * NB: The structures are written here to be useable without knowing whether
@@ -12,8 +13,8 @@
 typedef struct p00header_s {
 	char			description[8];		/* "C64File"+null */
 	char			filename[16];		/* Filename (PETSCII), null padded */
-	char			nul;				/* null character */
-	unsigned char	relsize;			/* REL record size, or null */
+	uint8_t			nul;				/* null character */
+	uint8_t			relsize;			/* REL record size, or null */
 } p00header_t;
 
 #pragma pack(pop)

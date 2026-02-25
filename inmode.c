@@ -11,10 +11,7 @@
 #include "select.h"
 #include "t64.h"
 
-#define FALSE 0
-#define TRUE 1
-
-void inconvert(FILE *, FILE *, const char *, int, int, int, basic_t);
+void inconvert(FILE *, FILE *, const char *, int, bool, bool, basic_t);
 
 /* bas2txt
  * - converts a binary file into a text file
@@ -24,7 +21,7 @@ void inconvert(FILE *, FILE *, const char *, int, int, int, basic_t);
  *      force - enforced BASIC mode (X16 or VicSuper)
  * out:	none
  */
-void bas2txt(const char *infile, FILE *output, int allfiles, int strict, basic_t force)
+void bas2txt(const char *infile, FILE *output, bool allfiles, bool strict, basic_t force)
 {
 	FILE		*input;
 	const char	*title_p;
@@ -92,7 +89,7 @@ void bas2txt(const char *infile, FILE *output, int allfiles, int strict, basic_t
 	fclose(input);
 }
 
-void t642txt(const char *infile, FILE *output, int allfiles, int strict, basic_t force)
+void t642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic_t force)
 {
 	FILE			*input;
 	char			title[21], *c_p;
@@ -177,16 +174,17 @@ void t642txt(const char *infile, FILE *output, int allfiles, int strict, basic_t
  * in:	input - open file, positioned at start of BASIC program
  * 		output - open file, to write to
  *		title - program title to print in header
+ *		adr - load address of the program
  *		allfiles - flag whether or not to convert "non-BASIC" files
  *      strict - output in strict tok64 compatible mode
  *      force - enforced BASIC mode (X16 or VicSuper)
  * out:	none
  */
 void inconvert(FILE *input, FILE *output, const char *title, int adr,
-               int allfiles, int strict, basic_t force)
+               bool allfiles, bool strict, basic_t force)
 {
 	int		nextadr;
-	char	buf[256];
+	uint8_t	buf[256];
 	basic_t	mode;
 
 	/* Check for valid BASIC file */
@@ -209,7 +207,7 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
 		if (Basic7 == mode || Basic71 == mode) {
 			if (strict) {
 				/* tok64 doesn't handle C128 programs, so skip strict mode */
-				strict = FALSE;
+				strict = false;
 				fprintf(stderr, "Strict mode ignored for C128 program: %s\n",
 				        title);
 			}
@@ -217,12 +215,12 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
 		}
 		else if (Basic4 == mode) {
 			/* tok64 doesn't handle BASIC 4 programs, so ignore strict mode */
-			strict = FALSE;
+			strict = false;
 			fprintf(output, "\nstart tokpet %s\n", title);
 		}
 		else if (X16 == mode) {
 			/* tok64 doesn't handle X16 programs, so ignore strict mode */
-			strict = FALSE;
+			strict = false;
 			fprintf(output, "\nstart tokx16 %s\n", title);
 		}
 		else {

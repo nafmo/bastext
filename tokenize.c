@@ -4,13 +4,11 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <ctype.h>
 
 #include "tokenize.h"
 #include "tokens.h"
-
-#define FALSE 0
-#define TRUE 1
 
 #if defined __EMX__ || defined _MSC_VER
 #define strcasecmp stricmp
@@ -30,18 +28,17 @@
  *      mode - BASIC version to tokenize
  * out:	nonzero on error
  */
-int tokenize(const char *input_p, char *output_p, int *length_p, basic_t mode)
+int tokenize(const char *input_p, uint8_t *output_p, int *length_p, basic_t mode)
 {
-	int	quotemode = FALSE;		/* flag for quote mode */
+	bool quotemode = false;		/* flag for quote mode */
 	unsigned short i;			/* loop counter */
 	unsigned linenumber;		/* line number */
 	int inputleft = strlen(input_p);	/* amount left of line to tokenize */
 	int tokenlen;				/* length of current token */
-	int match;					/* match found flag */
-	int notokenize = FALSE;		/* REM/DATA no tokenize flag */
+	bool notokenize = false;	/* REM/DATA no tokenize flag */
 	int rc = 0;					/* return code */
 	char buf[16];				/* buffer for special character match */
-	char *start_p = output_p;	/* pointer to input */
+	uint8_t *start_p = output_p;	/* pointer to start of input */
 
 	/* Skip any initial whitespace */
 	while (' ' == *input_p || '\t' == *input_p)	input_p ++;
@@ -94,7 +91,7 @@ int tokenize(const char *input_p, char *output_p, int *length_p, basic_t mode)
 			} /* if */
 			else {
 				/* It seems to be ok, so look it up */
-				match = FALSE;
+				int match = 0;
 
 				/* Threedigit numeric? */
 				if (strlen(buf) == 3 &&
@@ -173,7 +170,7 @@ int tokenize(const char *input_p, char *output_p, int *length_p, basic_t mode)
 			} /* else */
 		} /* if */
 		else if (!quotemode) {	/* check for token */
-			match = FALSE;
+			bool match = false;
 
 			/* Skip tokenization attempt if:
 			 *  . No tokenization flag is set
@@ -189,13 +186,13 @@ int tokenize(const char *input_p, char *output_p, int *length_p, basic_t mode)
 				if (inputleft >= tokenlen &&
 				    0 == strncasecmp(input_p, c64tokens[i], tokenlen)) {
 					/* token match found */
-					match = TRUE;
+					match = true;
 					(*output_p ++) = i + 128;	/* write token */
 					input_p += tokenlen;		/* skip token */
 					inputleft -= tokenlen;
 
 					if (15 == i || 3 == i) {	/* REM & DATA */
-						notokenize = TRUE;
+						notokenize = true;
 					}
 				} /* if */
 			} /* for */
@@ -207,7 +204,7 @@ int tokenize(const char *input_p, char *output_p, int *length_p, basic_t mode)
 					if (tokenlen && inputleft >= tokenlen &&
 					    0 == strncasecmp(input_p, x16tokens[i], tokenlen)) {
 						/* token match found */
-						match = TRUE;
+						match = true;
 						(*output_p ++) = 0xCE;		/* token escape */
 						(*output_p ++) = i + 0x80;  /* write token */
 						input_p += tokenlen;		/* skip token */
@@ -224,7 +221,7 @@ int tokenize(const char *input_p, char *output_p, int *length_p, basic_t mode)
 					if (tokenlen && inputleft >= tokenlen &&
 					    0 == strncasecmp(input_p, c128FEtokens[i], tokenlen)) {
 						/* token match found */
-						match = TRUE;
+						match = true;
 						(*output_p ++) = 0xFE;		/* token escape */
 						(*output_p ++) = i;			/* write token */
 						input_p += tokenlen;		/* skip token */
@@ -239,7 +236,7 @@ int tokenize(const char *input_p, char *output_p, int *length_p, basic_t mode)
 					if (tokenlen && inputleft >= tokenlen &&
 					    0 == strncasecmp(input_p, c128CEtokens[i], tokenlen)) {
 						/* token match found */
-						match = TRUE;
+						match = true;
 						(*output_p ++) = 0xCE;		/* token escape */
 						(*output_p ++) = i;			/* write token */
 						input_p += tokenlen;		/* skip token */
@@ -258,7 +255,7 @@ int tokenize(const char *input_p, char *output_p, int *length_p, basic_t mode)
 					if (tokenlen && inputleft >= tokenlen &&
 					    0 == strncasecmp(input_p, c128tokens[i], tokenlen)) {
 						/* token match found */
-						match = TRUE;
+						match = true;
 						(*output_p ++) = i + 204;	/* write token */
 						input_p += tokenlen;		/* skip token */
 						inputleft -= tokenlen;
@@ -273,7 +270,7 @@ int tokenize(const char *input_p, char *output_p, int *length_p, basic_t mode)
 					if (inputleft >= tokenlen &&
 					    0 == strncasecmp(input_p, tfc3tokens[i], tokenlen)) {
 						/* token match found */
-						match = TRUE;
+						match = true;
 						(*output_p ++) = i + 204;	/* write token */
 						input_p += tokenlen;		/* skip token */
 						inputleft -= tokenlen;
@@ -289,7 +286,7 @@ int tokenize(const char *input_p, char *output_p, int *length_p, basic_t mode)
 					    0 == strncasecmp(input_p, graphics52tokens[i],
 					                     tokenlen)) {
 						/* token match found */
-						match = TRUE;
+						match = true;
 						(*output_p ++) = i + 204;	/* write token */
 						input_p += tokenlen;		/* skip token */
 						inputleft -= tokenlen;
@@ -304,7 +301,7 @@ int tokenize(const char *input_p, char *output_p, int *length_p, basic_t mode)
 					if (inputleft >= tokenlen &&
 					    0 == strncasecmp(input_p, basic4tokens[i], tokenlen)) {
 						/* token match found */
-						match = TRUE;
+						match = true;
 						(*output_p ++) = i + 204;	/* write token */
 						input_p += tokenlen;		/* skip token */
 						inputleft -= tokenlen;
@@ -319,7 +316,7 @@ int tokenize(const char *input_p, char *output_p, int *length_p, basic_t mode)
 					if (inputleft >= tokenlen &&
 					    0 == strncasecmp(input_p, supertokens[i], tokenlen)) {
 						/* token match found */
-						match = TRUE;
+						match = true;
 						(*output_p ++) = i + 204;	/* write token */
 						input_p += tokenlen;		/* skip token */
 						inputleft -= tokenlen;

@@ -1,4 +1,5 @@
 #pragma once
+#include <stdbool.h>
 
 /* C64 BASIC 2.0 */
 extern const char *c64tokens[];
@@ -32,4 +33,4 @@ extern const char *x16tokens[];
 
 /* PETSCII */
 extern const char *petscii[];
-int nontok64compatible(int petscii);
+bool nontok64compatible(int petscii);
