@@ -38,7 +38,7 @@ void txt2bas(const char *infile, basic_t force, outmode_t outmode)
 	t64header_t		header;
 	t64record_t		record;
 	p00header_t		p00header;
-	unsigned int	totalentries, usedentries, i;
+	unsigned int	totalentries, usedentries;
 	long			fptr;
 
 	/* First, open input file */
@@ -76,7 +76,7 @@ void txt2bas(const char *infile, basic_t force, outmode_t outmode)
 
 			/* Fill entries */
 			memset(&record, 0, sizeof(record));
-			for (i = 0; i < STD_DIRSIZE; i ++) {
+			for (int i = 0; i < STD_DIRSIZE; i ++) {
 				fwrite(&record, sizeof(record), 1, output);
 			}
 		}
@@ -406,7 +406,6 @@ int outconvert(FILE *input, FILE *output, int adr, basic_t mode)
 void make_petscii_name(char petscii_filename[16], const char *filename, char filler)
 {
 	char			text[256], *c_p;
-	unsigned int	i;
 
 	strcpy(text, filename);
 	if (NULL != (c_p = strstr(text, ".prg"))) {
@@ -417,7 +416,7 @@ void make_petscii_name(char petscii_filename[16], const char *filename, char fil
 
 	/* Make uppercase, convert _ to spaces, and fill with 'filler'.
 	 */
-	for (i = 0; i < 16; i ++) {
+	for (unsigned int i = 0; i < 16; i ++) {
 		if (i >= c_p - text) {
 			petscii_filename[i] = filler;
 		}

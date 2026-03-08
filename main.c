@@ -25,7 +25,7 @@ void helpscreen(const char *progname);
  */
 int main(int argc, char *argv[])
 {
-	int			option, i;
+	int			option;
 	bool		allfiles = false;
 	bool		t64mode = false;
 	bool		p00mode = false;
@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Filename to read first is in argv[optind] */
-	for (i = optind; i < argc; i ++) {
+	for (int i = optind; i < argc; i ++) {
 		fprintf(stderr, "Processing: %s\n", argv[i]);
 
 		switch (mode) {

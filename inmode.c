@@ -95,7 +95,7 @@ void t642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 	char			title[21], *c_p;
 	t64header_t		header;
 	t64record_t		record;
-	unsigned int	totalentries, usedentries, i;
+	unsigned int	totalentries, usedentries;
 	int				adr;
 	long			fptr;
 
@@ -116,7 +116,7 @@ void t642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 	}
 
 	/* Cycle through the entries */
-	for (i = 0; i < usedentries; i ++) {
+	for (unsigned int i = 0; i < usedentries; i ++) {
 		/* Seek to the directory entry and read it */
 		fseek(input, sizeof(t64header_t) + sizeof(t64record_t) * i, SEEK_SET);
 		fread(&record, sizeof(t64record_t), 1, input);
