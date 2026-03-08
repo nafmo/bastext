@@ -10,9 +10,12 @@
 #include "tokenize.h"
 #include "tokens.h"
 
-#if defined __EMX__ || defined _MSC_VER
+#if defined __EMX__
 #define strcasecmp stricmp
 #define strncasecmp strnicmp
+#elif defined _MSC_VER
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
 #endif
 
 /* The bytestream buffer used in the function (output) is from the line

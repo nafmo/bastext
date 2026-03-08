@@ -13,8 +13,10 @@
 #include "p00.h"
 #include "select.h"
 
-#if defined __EMX__ || defined _MSC_VER
+#if defined __EMX__
 #define strncasecmp strnicmp
+#elif defined _MSC_VER
+#define strncasecmp _strnicmp
 #endif
 
 int outconvert(FILE *, FILE *, int, basic_t);

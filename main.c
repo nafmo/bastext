@@ -11,8 +11,10 @@
 #include "tokenize.h"
 #include "utility.h"
 
-#if defined __EMX__ || defined _MSC_VER
+#if defined __EMX__
 #define strcasecmp stricmp
+#elif defined _MSC_VER
+#define strcasecmp _stricmp
 #endif
 
 typedef enum runmode_e { None, In, Out } runmode_t;
