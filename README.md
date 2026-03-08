@@ -236,7 +236,12 @@ HISTORY
   Simplify parameter parsing.
   Add support for reading and writing P00 archives.
   Add Commander X16 tokens.
+  Add VIC-20 Super Expander tokens.
+  Fix BASIC 3.5 support.
+  Fix PET BASIC 4.0 support.
   Fix Graphics52 tokenizer.
+  Fix missing mapping for "purple".
+  Port to Microsoft Visual C and start updating to modern C.
 
 BUILDING
 --------
