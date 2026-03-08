@@ -498,7 +498,7 @@ const char *petscii[] = {
 	"null",				/* 0 */		/* 0x0 */
 	"ct a",
 	"ct b",
-	"ct c",
+	"ct c", /* stop */
 	"ct d",
 	"white",
 	"ct f",
@@ -626,7 +626,7 @@ const char *petscii[] = {
 	"128",							/* 0x80 */
 	"orange",
 	"130",				/* 130 */
-	"131",
+	"131", /* run */
 	"132",
 	"f1",
 	"f3",
@@ -651,7 +651,7 @@ const char *petscii[] = {
 	"light green",
 	"light blue",
 	"light gray",
-	"156", /* run */
+	"purple",
 	"left",
 	"yellow",
 	"cyan",
