@@ -278,9 +278,16 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
 			fprintf(output, "63999 REM \"Invalid BASIC input %s\n", title);
 		}
 
-		/* Print tok64 footer */
+		/* Print tok64 footer; we only check for "stop tok" when reading
+		 * the file back, but match the start header above. */
 		if (Basic7 == mode || Basic71 == mode) {
 			fprintf(output, "stop tok128\n(" PROGNAME " " PROGVERSION ")\n");
+		}
+		else if (Basic4 == mode) {
+			fprintf(output, "stop tokpet\n(" PROGNAME " " PROGVERSION ")\n");
+		}
+		else if (X16 == mode) {
+			fprintf(output, "stop tokx16\n(" PROGNAME " " PROGVERSION ")\n");
 		}
 		else {
 			fprintf(output, "stop tok64\n(" PROGNAME " " PROGVERSION ")\n");
