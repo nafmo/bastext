@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 	 *  d (dest)   - destination filename
 	 *  ? (help)
 	 */
-	while (-1 != (option = getopt(argc, argv, "iohf:b:asdt23571:?"))) {
+	while (-1 != (option = getopt(argc, argv, "iohf:b:asd:t23571:?"))) {
 		switch (option) {
 			case 'i':
 				mode = In;
