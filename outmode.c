@@ -422,8 +422,7 @@ void make_petscii_name(char petscii_filename[16], const char *filename, char fil
 		if (i >= c_p - text) {
 			petscii_filename[i] = filler;
 		}
-		else if ('_' == petscii_filename[i]) {
-		         petscii_filename[i] = ' ';
+		else if ('_' == text[i]) {
 			petscii_filename[i] = ' ';
 		}
 		else if (0x60 == (0x60 & text[i])) {
