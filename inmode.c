@@ -184,6 +184,7 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
                bool allfiles, bool strict, basic_t force)
 {
 	int		nextadr;
+	bool	valid;
 	uint8_t	buf[256];
 	basic_t	mode;
 
@@ -242,6 +243,7 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
 		 *  [2-3]- line number                     \_ sent to
 		 *  [4-n]- tokenized line, null terminated /  detokenize
 		 */
+		valid = true;
 
 		/* Read address to next line */
 		nextadr = fgetc(input);			/* low byte */
@@ -253,11 +255,14 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
 		 */
 		while (nextadr && nextadr > adr && nextadr - adr < 256) {
 			/* Read the line into the buffer */
-			fread(buf, nextadr - adr - 2, 1, input);
+			ptrdiff_t len = nextadr - adr - 2;
+			fread(buf, len, 1, input);
 			adr = nextadr;
 
 			/* Convert to text */
-			detokenize(buf, output, mode, strict);
+			if (detokenize(buf, len, output, mode, strict) != 0) {
+				valid = false;
+			}
 
 			/* Read address to next line */
 			nextadr = fgetc(input);			/* low byte */
@@ -266,6 +271,9 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
 		
 		/* If nextadr != null, then the program was invalid */
 		if (nextadr != 0) {
+			valid = false;
+		}
+		if (!valid) {
 			fprintf(stderr, "Invalid BASIC file: %s\n", title);
 			fprintf(output, "63999 REM \"Invalid BASIC input %s\n", title);
 		}

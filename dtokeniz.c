@@ -17,12 +17,13 @@
 /* detokenize
  * - detokenize a C64/C128 BASIC (in binary) line
  * in:	input_p - pointer to a bytestream to detokenize
+ *      len - length of the buffer in input_p
  *		output - File to write the result to
  *      mode - BASIC version to detokenize
  *		strict - flag for using strict tok64 compatibility
  * out:	nonzero on error
  */
-int detokenize(const uint8_t *input_p, FILE *output, basic_t mode, int strict)
+int detokenize(const uint8_t *input_p, ptrdiff_t len, FILE *output, basic_t mode, int strict)
 {
 	bool quotemode = false;		/* flag for quote mode */
 	unsigned short i;			/* loop counter */
@@ -30,11 +31,13 @@ int detokenize(const uint8_t *input_p, FILE *output, basic_t mode, int strict)
 	int rc = 0;					/* return code */
 	bool isspecial;				/* flag for special characters */
 	const uint8_t *ch_p;		/* pointer moving over input */
+	const uint8_t *end_p;		/* pointer to past the end of input */
 	const char *escape_p;		/* pointer to current escape sequence */
 	char numeric[4];			/* threedigit numeric escape for strict tok64
 								   compatibility */
 
 	ch_p = input_p;
+	end_p = input_p + len - 1; /* point to trailing null character */
 
 	/* First two bytes is the line number as (low,high) */
 	linenumber = (*ch_p) | (*(ch_p + 1)) << 8;
@@ -44,7 +47,7 @@ int detokenize(const uint8_t *input_p, FILE *output, basic_t mode, int strict)
 	fprintf(output, "%u ", linenumber);
 
 	/* Next comes a bytestream of line data, ending in a null character */
-	while (*ch_p) {
+	while (ch_p < end_p) {
 		/* Point to PETSCII sequence */
 		escape_p = petscii[*ch_p];
 		if (strict && nontok64compatible(*ch_p)) {
@@ -200,6 +203,11 @@ int detokenize(const uint8_t *input_p, FILE *output, basic_t mode, int strict)
 	} /* while */
 
 	fputc('\n', output);
+
+	/* BASIC lines always end with a null character */
+	if (*ch_p != 0) {
+		rc = 1;
+	}
 
 	return rc;
 }

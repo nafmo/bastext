@@ -237,6 +237,7 @@ HISTORY
   Add support for reading and writing P00 archives.
   Add Commander X16 tokens.
   Add VIC-20 Super Expander tokens.
+  Allow parsing BASIC lines with embedded null characters.
   Fix BASIC 3.5 support.
   Fix PET BASIC 4.0 support.
   Fix Graphics52 tokenizer.
