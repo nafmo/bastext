@@ -170,15 +170,21 @@ int main(int argc, char *argv[])
 	/* If in input mode, and destination file is other than '-' (stdout),
 	 * open the output file, else set it to stdout
 	 */
-	if (In == mode && 0 != strcmp(outfile, "-")) {
-		output = fopen(outfile, "at");
-		if (NULL == output) {
-			output = fopen(outfile, "wt");
+	if (0 != strcmp(outfile, "-")) {
+		if (In == mode) {
+			output = fopen(outfile, "at");
 			if (NULL == output) {
-				fprintf(stderr, "%s: Unable to open output file: %s\n",
-				        argv[0], outfile);
-				exit(1);
+				output = fopen(outfile, "wt");
+				if (NULL == output) {
+					fprintf(stderr, "%s: Unable to open output file: %s\n",
+					        argv[0], outfile);
+					exit(1);
+				}
 			}
+		} else {
+			fprintf(stderr, "%s: Cannot use -d in output mode\n",
+			        argv[0]);
+			exit(1);
 		}
 	}
 	else {
