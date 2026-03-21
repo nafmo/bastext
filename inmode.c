@@ -10,8 +10,10 @@
 #include "version.h"
 #include "select.h"
 #include "t64.h"
+#include "d64.h"
 
 void inconvert(FILE *, FILE *, const char *, int, bool, bool, basic_t);
+void from_petscii_name(char title[21], char petscii_filename[16]);
 
 /* bas2txt
  * - converts a binary file into a text file
@@ -92,7 +94,7 @@ void bas2txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 void t642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic_t force)
 {
 	FILE			*input;
-	char			title[21], *c_p;
+	char			title[21];
 	t64header_t		header;
 	t64record_t		record;
 	unsigned int	totalentries, usedentries;
@@ -126,30 +128,7 @@ void t642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 			/* This is an allocated entry, with a normal program file in it */
 
 			/* Get the file title */
-			strncpy(title, record.filename, 16);
-			title[16] = 0;		/* null terminate */
-
-			while ((char) 32 == title[strlen(title) - 1] ||
-			       (char) 160 == title[strlen(title) - 1]) {
-				/* Remove trailing spaces */
-				title[strlen(title) - 1] = 0;
-			}
-
-			/* Convert to uppercase ASCII, and change spaces to underscores */
-			c_p = title;
-			while (*c_p) {
-				*c_p &= 0x7F;			/* Strip highbit */
-				if (0x60 == (*c_p & 0x60)) {
-					*c_p &= ~0x20;		/* Lowercase => uppercase */
-				}
-				else if (' ' == *c_p) {
-					*c_p = '_';
-				}
-				c_p ++;
-			}
-
-			/* Add .prg suffix */
-			strcat(title, ".prg");
+			from_petscii_name(title, record.filename);
 
 			/* Retrieve the starting address */
 			adr = record.startaddress[0] | (record.startaddress[1] << 8);
@@ -167,6 +146,155 @@ void t642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 
 	/* Close files */
 	fclose(input);
+}
+
+void d642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic_t force)
+{
+	FILE			*input, *prgfile;
+	uint8_t			sector;
+	bam_t			bam;
+	dirblock_t		dirblock;
+	char			title[21];
+	uint8_t			buf[256];       /* One disk sector */
+
+	/* First, open input file */
+	input = opend64(infile, &bam);
+	if (!input) {
+		fprintf(stderr, "Unable to open input file: %s\n", infile);
+		exit(1);
+	}
+
+	/* Read the directory; we ignore the BAM completely */
+	sector = 1;
+	while (sector) {
+		/* Load directory block */
+		fseek(input, 91392 + sector * 256, SEEK_SET);
+		fread(&dirblock, sizeof (dirblock), 1, input);
+
+		/* Each block contains eight directory entries */
+		for (size_t i = 0; i < 8; ++ i) {
+			if ((dirblock.file[i].filetype & (D64_CLO | D64_FTY)) == (D64_PRG | D64_CLO)) {
+				/* This is a valid PRG file entry */
+				int				adr;
+				size_t			blocks;
+				uint8_t			t, s;
+				bool			valid;
+
+				/* Get the file title */
+				from_petscii_name(title, dirblock.file[i].name);
+
+				/* inconvert() requires a linear file. Copy the contents to a
+				 * temporary file, which we then feed it.
+				 *
+				 * While tmpfile() is portable (C11), it seems to always write
+				 * to /tmp (GNU libc) or the root directory (Microsoft), which
+				 * is *bad*. Reconsider this API.
+				 *
+				 * For GNU libc, consider using fopencookie() to avoid the
+				 * temporary file altogether, or rewrite inconvert() to take
+				 * a buffer instead.
+				 */
+				prgfile = tmpfile();
+				if (!prgfile) {
+					fprintf(stderr, "Unable to allocate temporary file for %s\n", title);
+					continue;
+				}
+
+				/* Check starting position for sanity */
+				t = dirblock.file[i].t;
+				s = dirblock.file[i].s;
+				if (t == 18 || t > 35 || s > 21) {
+					fprintf(stderr, "Directory entry for %s is invalid\n", title);
+					continue;
+				}
+
+				/* Make sure loops don't kill us */
+				blocks = 664;
+
+				/* End of file marker is track == 0 */
+				valid = true;
+				while (t && blocks --) {
+					/* Read requested sector */
+					fseek(input, ts2block(t, s) * 256, SEEK_SET);
+					fread(buf, 1, 256, input);
+
+					/* Read links */
+					t = buf[0];
+					s = buf[1]; /* length of data if t == 0 */
+
+					/* Write to the temporary file */
+					fwrite(&buf[2], 1, t ? 254 : s, prgfile);
+
+					/* Check for error conditions */
+					if (t && (t == 18 || t > 35 || s > 21)) {
+						fprintf(stderr, "File %s contains invalid track/sector links [%d:%d]\n", title, t, s);
+						valid = false;
+						t = 0;
+					}
+
+				}
+
+				if (valid) {
+					/* Now rewind the file to read the start address */
+					fseek(prgfile, 0, SEEK_SET);
+					adr = fgetc(prgfile);		/* low byte */
+					adr |= fgetc(prgfile) << 8;	/* high byte */
+
+					/* Now convert the file to text */
+					inconvert(prgfile, output, title, adr, allfiles, strict, force);
+				}
+
+				/* Closing the temporary files deletes it */
+				fclose(prgfile);
+			}
+		}
+
+		/* Follow the directory links, making sure we stay on the right
+		 * track. */
+		sector = dirblock.link.s;
+		if (dirblock.link.t != 18) sector = 0;
+	}
+
+	/* Finish up */
+	fclose(input);
+}
+
+/* Copy filename from the T64, D64 or P00 record and convert
+ * to ASCII.
+ *
+ * filename is always 16 characters long, but can be padded
+ * with nulls, spaces (0x20) or shifted spaces (0xA0).
+ *
+ * The output buffer must be 21 characters long as we add a
+ * ".prg" suffix and a terminating null character */
+void from_petscii_name(char title[21], char petscii_filename[16])
+{
+	char	*c_p;
+
+	memcpy(title, petscii_filename, 16);
+	title[16] = 0;		/* null terminate */
+
+	while ((char) 32 == title[strlen(title) - 1] ||
+	       (char) 160 == title[strlen(title) - 1]) {
+		/* Remove trailing spaces */
+		title[strlen(title) - 1] = 0;
+	}
+
+	/* Convert to uppercase ASCII, and change spaces to underscores */
+	c_p = title;
+	while (*c_p) {
+		*c_p &= 0x7F;			/* Strip highbit */
+		if (0x60 == (*c_p & 0x60)) {
+			*c_p &= ~0x20;		/* Lowercase => uppercase */
+		}
+		else if (' ' == *c_p) {
+			*c_p = '_';
+		}
+		c_p ++;
+	}
+
+	/* Add .prg suffix */
+	strcat(title, ".prg");
 }
 
 /* inconvert

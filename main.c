@@ -29,8 +29,7 @@ int main(int argc, char *argv[])
 {
 	int			option;
 	bool		allfiles = false;
-	bool		t64mode = false;
-	bool		p00mode = false;
+	outmode_t	outmode = Prg;
 	bool		strict = false;
 	runmode_t	mode = None;
 	basic_t		force = Any;
@@ -50,7 +49,8 @@ int main(int argc, char *argv[])
 	 * File format:
 	 *  f (format) - select format for input/output file:
 	 *    -f t64 - T64 mode   (legacy: -t)
-	 *    -d p00 - P00 mode (out mode only; autodetecet in in mode)
+	 *    -f d64 - D64 mode (out mode only)
+	 *    -f p00 - P00 mode (out mode only; autodetecet in in mode)
 	 *
 	 * Source format:
 	 *  b (basic) - force BASIC mode
@@ -84,12 +84,13 @@ int main(int argc, char *argv[])
 			case 'f':
 				if (0 == strcasecmp(optarg, "t64")) {
 			case 't':
-					t64mode = true;
-					p00mode = false;
+					outmode = T64;
+				}
+				else if (0 == strcasecmp(optarg, "d64")) {
+					outmode = D64;
 				}
 				else if (0 == strcasecmp(optarg, "p00")) {
-					t64mode = false;
-					p00mode = true;
+					outmode = P00;
 				}
 				break;
 
@@ -197,12 +198,23 @@ int main(int argc, char *argv[])
 
 		switch (mode) {
 			case In:
-				if (t64mode)	t642txt(argv[i], output, allfiles, strict, force);
-				else			bas2txt(argv[i], output, allfiles, strict, force);
+				switch (outmode) {
+					case T64:
+						t642txt(argv[i], output, allfiles, strict, force);
+						break;
+
+					case D64:
+						d642txt(argv[i], output, allfiles, strict, force);
+						break;
+
+					default:
+						bas2txt(argv[i], output, allfiles, strict, force);
+						break;
+				}
 				break;
 
 			case Out:
-				txt2bas(argv[i], force, t64mode ? T64 : (p00mode ? P00 : Prg));
+				txt2bas(argv[i], force, outmode);
 				break;
 
 		case None:
@@ -229,6 +241,7 @@ void helpscreen(const char *progname)
 	        "  " SWITCH "ft64\tT64 mode (in: reads from specified T64 archive(s)\n"
 	        "    \t          out: creates/appends to bastext.t64)\n"
 	        "  " SWITCH "fp00\tP00 mode (out: wraps output in .p00 container)\n"
+	        "  " SWITCH "fd64\tD64 mode (in: reads from specifiied D64 image(s))\n"
 	        "\n BASIC dialect selection:\n"
 	        "  " SWITCH "b2.0\tForce C64 BASIC 2.0 interpretation\n"
 	        "  " SWITCH "b3.5\tForce C16/+4 BASIC 3.5 interpretation\n"

@@ -124,6 +124,11 @@ file is 30 entries. If you try to add more files to it, the program
 will abort with an error message. The default directory size is
 controlled in the t64.h file.
 
+    -f d64
+Enable D64 (Commodore 1541 disk image file) mode. When in input mode,
+this means that instead of the specified file names being binary
+Commodore BASIC files, they are D64 images. Ignored in output mode.
+
     -f p00
 Enable P00 (PC64 emulator container file) mode. The Commodore BASIC
 files are written to the current directory but get a PC64 container
