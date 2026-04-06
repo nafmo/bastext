@@ -5,6 +5,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#ifdef _MSC_VER
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
 #include "inmode.h"
 #include "tokenize.h"
 #include "version.h"
@@ -155,6 +163,7 @@ void d642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 	bam_t			bam;
 	dirblock_t		dirblock;
 	char			title[21];
+	char			tmpfilename[14];
 	uint8_t			buf[256];       /* One disk sector */
 
 	/* First, open input file */
@@ -175,30 +184,13 @@ void d642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 		for (size_t i = 0; i < 8; ++ i) {
 			if ((dirblock.file[i].filetype & (D64_CLO | D64_FTY)) == (D64_PRG | D64_CLO)) {
 				/* This is a valid PRG file entry */
-				int				adr;
+				int				adr, fd;
 				size_t			blocks;
 				uint8_t			t, s;
 				bool			valid;
 
 				/* Get the file title */
 				from_petscii_name(title, dirblock.file[i].name);
-
-				/* inconvert() requires a linear file. Copy the contents to a
-				 * temporary file, which we then feed it.
-				 *
-				 * While tmpfile() is portable (C11), it seems to always write
-				 * to /tmp (GNU libc) or the root directory (Microsoft), which
-				 * is *bad*. Reconsider this API.
-				 *
-				 * For GNU libc, consider using fopencookie() to avoid the
-				 * temporary file altogether, or rewrite inconvert() to take
-				 * a buffer instead.
-				 */
-				prgfile = tmpfile();
-				if (!prgfile) {
-					fprintf(stderr, "Unable to allocate temporary file for %s\n", title);
-					continue;
-				}
 
 				/* Check starting position for sanity */
 				t = dirblock.file[i].t;
@@ -207,6 +199,44 @@ void d642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 					fprintf(stderr, "Directory entry for %s is invalid\n", title);
 					continue;
 				}
+
+				/* inconvert() requires a linear file. Copy the contents to a
+				 * temporary file, which we then feed it.
+				 *
+				 * While tmpfile() is portable (C11), it seems to always write
+				 * to /tmp (GNU libc) or the root directory (Microsoft), which
+				 * is *bad*.
+				 *
+				 * For GNU libc and Darwin, we kan use mkstemps(), but for
+				 * Microsoft we roll our own code.
+				 */
+#ifdef _MSC_VER
+				for (int j = 0; j < 10; ++ j) {
+					snprintf(tmpfilename, sizeof tmpfilename, "bastext%02d.tmp", j);
+					fd = _open(tmpfilename,
+					           _O_BINARY | _O_CREAT | _O_EXCL | _O_RDWR | _O_TEMPORARY,
+					           _S_IREAD | _S_IWRITE);
+					if (fd != -1) {
+						break;
+					}
+				}
+#else
+				strcpy(tmpfilename, "bastextXXXXXX");
+				fd = mkstemp(tmpfilename);
+#endif
+				if (-1 == fd) {
+					fprintf(stderr, "Unable to allocate temporary file for %s\n", title);
+					continue;
+				}
+#ifndef _MSC_VER
+				/* Make sure we do not leave the file on disk; on Microsoft,
+				 * _O_TEMPORARY removes the file on close. On real operating
+				 * systems, we call unlink() to remove the file from the
+				 * directory even earlier.
+				 */
+				unlink(tmpfilename);
+#endif
+				prgfile = fdopen(fd, "w+b");
 
 				/* Make sure loops don't kill us */
 				blocks = 664;
