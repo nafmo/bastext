@@ -261,7 +261,8 @@ const char *c128CEtokens[] = {
 	"RSPRITE",
 	"RSPCOLOR",
 	"XOR",
-	"RWINDOW"			/* 9 */		/* 0x9 */
+	"RWINDOW",
+	"POINTER"			/* 10 */	/* 0xA */
 };
 
 /* C128 BASIC 7.0

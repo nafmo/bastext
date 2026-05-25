@@ -234,7 +234,7 @@ int tokenize(const char *input_p, uint8_t *output_p, int *length_p, basic_t mode
 
 				if (match) goto skipover;	/* nicer than nested ifs */
 
-				for (i = 2; i <= 9 && !match; i ++) {
+				for (i = 2; i <= 10 && !match; i ++) {
 					tokenlen = strlen(c128CEtokens[i]);	/* as above */
 					if (tokenlen && inputleft >= tokenlen &&
 					    0 == strncasecmp(input_p, c128CEtokens[i], tokenlen)) {
