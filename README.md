@@ -23,7 +23,7 @@ the support for Commodore BASIC extensions and dialects.
 The following Commodore BASIC versions and extensions are supported by
 this version of BasText:
 
-* Commodore BASIC 2.0 (VIC20/C64)
+* Commodore BASIC 2.0 (PET/VIC-20/C64)
 * Commodore BASIC 3.5 (C16/+4)
 * Commodore BASIC 4.0 (PET)
 * Commodore BASIC 7.0 (C128)
@@ -39,7 +39,7 @@ of the file. These starting addresses are recognized, and interpreted
 (addresses written in hexadecimal):
 
     $0401
-VIC-20 BASIC 2.0 (3K RAM expansion)
+VIC-20 BASIC 2.0 (3K RAM expansion) or Commodore PET BASIC 2.0
 
     $0801
 Commodore 64 BASIC 2.0
@@ -198,7 +198,7 @@ Selects the filename to write the output to. If the filename is not
 given, or is given as "-", the listings will be output on the standard
 output device (normally the console).
 
-Please note that the MS-DOS and OS/2 versions (EMX compiled) and Windows
+Please note that the MS-DOS, OS/2 versions (EMX compiled) and Windows
 versions (Visual C) uses / (slash) as parameter character.
 
 EXAMPLES
@@ -237,16 +237,18 @@ HISTORY
 * v1.1 - 2023-11-21 -
   Fix incorrect keyboard mapping.
   Fix VICE compatibility.
-* v1.2 - unreleased -
+* v1.2 - 2026-05-25 -
   Simplify parameter parsing.
   Add support for reading and writing P00 archives.
   Add Commander X16 tokens.
   Add VIC-20 Super Expander tokens.
   Allow parsing BASIC lines with embedded null characters.
+  Fix handling of DATA lines in output mode.
   Fix BASIC 3.5 support.
   Fix PET BASIC 4.0 support.
   Fix Graphics52 tokenizer.
   Fix missing mapping for "purple".
+  Fix missing support for "POINTER" in BASIC 7.0 mode.
   Port to Microsoft Visual C and start updating to modern C.
 
 BUILDING
