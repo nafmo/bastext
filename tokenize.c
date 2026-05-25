@@ -38,7 +38,8 @@ int tokenize(const char *input_p, uint8_t *output_p, int *length_p, basic_t mode
 	unsigned linenumber;		/* line number */
 	size_t inputleft = strlen(input_p);	/* amount left of line to tokenize */
 	int tokenlen;				/* length of current token */
-	bool notokenize = false;	/* REM/DATA no tokenize flag */
+	bool remmode = false;		/* REM no tokenize flag */
+	bool datamode = false;		/* DATA no tokenize flag */
 	int rc = 0;					/* return code */
 	char buf[16];				/* buffer for special character match */
 	uint8_t *start_p = output_p;	/* pointer to start of input */
@@ -176,11 +177,11 @@ int tokenize(const char *input_p, uint8_t *output_p, int *length_p, basic_t mode
 			bool match = false;
 
 			/* Skip tokenization attempt if:
-			 *  . No tokenization flag is set
+			 *  . We are in REM or DATA mode
 			 *  . Input string starts with numeral or space
 			 *    (no tokens starts with numerals or spaces)
 			 */
-			if (notokenize || ' ' == *input_p || isdigit(*input_p))
+			if (remmode || datamode || ' ' == *input_p || isdigit(*input_p))
 				goto skiptokenize;		/* Looks better than nested if */
 
 			/* C64 BASIC */
@@ -194,8 +195,11 @@ int tokenize(const char *input_p, uint8_t *output_p, int *length_p, basic_t mode
 					input_p += tokenlen;		/* skip token */
 					inputleft -= tokenlen;
 
-					if (15 == i || 3 == i) {	/* REM & DATA */
-						notokenize = true;
+					if (3 == i) {				/* DATA */
+						datamode = true;
+					}
+					else if (15 == i) {			/* REM */
+						remmode = true;
 					}
 				} /* if */
 			} /* for */
@@ -345,6 +349,8 @@ skiptokenize:
 					*(output_p ++) = *input_p;
 					if ('\"' == *input_p) {
 						quotemode = !quotemode;		/* invert quotemode */
+					} else if (':' == *input_p) {
+						datamode = false;			/* end DATA */
 					} /* if */
 					input_p ++;
 					inputleft --;
