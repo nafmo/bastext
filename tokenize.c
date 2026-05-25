@@ -36,7 +36,7 @@ int tokenize(const char *input_p, uint8_t *output_p, int *length_p, basic_t mode
 	bool quotemode = false;		/* flag for quote mode */
 	unsigned short i;			/* loop counter */
 	unsigned linenumber;		/* line number */
-	int inputleft = strlen(input_p);	/* amount left of line to tokenize */
+	size_t inputleft = strlen(input_p);	/* amount left of line to tokenize */
 	int tokenlen;				/* length of current token */
 	bool notokenize = false;	/* REM/DATA no tokenize flag */
 	int rc = 0;					/* return code */
