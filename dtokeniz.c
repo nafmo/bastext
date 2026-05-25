@@ -149,7 +149,7 @@ int detokenize(const uint8_t *input_p, ptrdiff_t len, FILE *output, basic_t mode
 					ch_p ++;
 					fprintf(output, "%s", c128FEtokens[*ch_p]);
 				} /* else */
-				else if (Basic35 == mode || Basic7 == mode || Basic71 == mode) {
+				else if (*ch_p <= 253 && (Basic35 == mode || Basic7 == mode || Basic71 == mode)) {
 					/* Commodore 16/Plus4 BASIC 3.5 or C128 BASIC 7.0 */
 					fprintf(output, "%s", c128tokens[*ch_p - 204]);
 				} /* else */
@@ -157,7 +157,7 @@ int detokenize(const uint8_t *input_p, ptrdiff_t len, FILE *output, basic_t mode
 					/* VIC-20 Super Expander */
 					fprintf(output, "%s", supertokens[*ch_p - 204]);
 				}
-				else if (Graphics52 == mode) {
+				else if (*ch_p <= 254 && Graphics52 == mode) {
 					/* C64 Graphics52 */
 					fprintf(output, "%s", graphics52tokens[*ch_p - 204]);
 				} /* else */
