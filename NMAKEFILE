@@ -8,7 +8,7 @@ all: bastext.exe
 
 # Main executable ------------------------------------------------------------
 bastext.exe: $(OBJS)
-	$(CC) $(OBJS) -o bastext.exe
+	$(CC) /Febastext.exe $(OBJS)
 
 tokens.obj: tokens.c tokens.h
 tokenize.obj: tokenize.c tokenize.h tokens.h
