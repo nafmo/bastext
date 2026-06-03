@@ -359,7 +359,7 @@ int outconvert(FILE *input, FILE *output, int adr, basic_t mode)
 			goon = false;
 		}
 		else {
-			uint8_t		buf[256];
+			uint8_t		buf[255];
 
 			/* Tokenize */
 			if (tokenize(text, buf, &linelength, mode)) {
@@ -378,7 +378,7 @@ int outconvert(FILE *input, FILE *output, int adr, basic_t mode)
 
 	/* If we had errors while interpreting the source, say so */
 	if (errors) {
-		uint8_t		buf[256];
+		uint8_t		buf[255];
 
 		sprintf(text, "63999 REM\"%u errors in tokenization", errors);
 		tokenize(text, buf, &linelength, mode);

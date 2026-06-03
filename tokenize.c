@@ -31,7 +31,7 @@
  *      mode - BASIC version to tokenize
  * out:	nonzero on error
  */
-int tokenize(const char *input_p, uint8_t *output_p, int *length_p, basic_t mode)
+int tokenize(const char *input_p, uint8_t output_p[255], int *length_p, basic_t mode)
 {
 	bool quotemode = false;		/* flag for quote mode */
 	unsigned short i;			/* loop counter */
@@ -42,16 +42,25 @@ int tokenize(const char *input_p, uint8_t *output_p, int *length_p, basic_t mode
 	bool datamode = false;		/* DATA no tokenize flag */
 	int rc = 0;					/* return code */
 	char buf[16];				/* buffer for special character match */
-	uint8_t *start_p = output_p;	/* pointer to start of input */
+	uint8_t *start_p = output_p;	/* pointer to start of output buffer */
+	uint8_t *end_p = start_p + 255;	/* pointer to just beyond end of output buffer */
 
 	/* Skip any initial whitespace */
-	while (' ' == *input_p || '\t' == *input_p)	input_p ++;
+	while (' ' == *input_p || '\t' == *input_p)	{
+		input_p ++;
+		inputleft --;
+	}
 
 	/* Get the line number */
+	if (!isdigit(*input_p)) {
+		fprintf(stderr, "* Line number missing: %s\n", input_p);
+		rc = 1;
+	}
 	linenumber = 0;
 	while (isdigit(*input_p)) {	/* line number consits of numerals */
 		linenumber = linenumber * 10 + (*input_p - '0');
 		input_p ++;
+		inputleft --;
 	} /* while */
 
 	if (linenumber >= 64000) {
@@ -64,16 +73,24 @@ int tokenize(const char *input_p, uint8_t *output_p, int *length_p, basic_t mode
 	*(output_p ++) = linenumber >> 8;	/* high */
 	
 	/* Kill off any extraneous spaces */
-	while (' ' == *input_p) input_p ++;
+	while (' ' == *input_p) {
+		input_p ++;
+		inputleft --;
+	}
 
-	/* Now process the rest of the line */
-	while (*input_p) {			/* while string isn't ended */
+	/* Now process the rest of the line
+	 * while string isn't ended and there is space left in the buffer;
+	 * compare to end - 1 as we need to fit a trailing null byte (this
+	 * also allows outputting a double-byte token without a buffer
+	 * overrun.  */
+	while (*input_p && output_p < end_p - 1) {
 		if ('{' == *input_p) {	/* special character */
 			/* copy special character name to buffer
 			 * character name ends with '}' or '*'
 			 */
 			i = 0;				/* buffer position counter */
 			input_p ++;			/* position at first character of name */
+			inputleft --;
 			while (i < 16 && *input_p != '*' && *input_p != '}' && *input_p) {
 				/* terminate loop on:
 				 *  . buffer size overrun (error)
@@ -84,6 +101,7 @@ int tokenize(const char *input_p, uint8_t *output_p, int *length_p, basic_t mode
 				 * else: copy from character name to buffer
 				 */
 				buf[i ++] = *(input_p ++);
+				inputleft --;
 			} /* while */
 			buf[i] = 0;	/* terminate with null */
 			/* Check for error condition */
@@ -136,10 +154,12 @@ int tokenize(const char *input_p, uint8_t *output_p, int *length_p, basic_t mode
 					i = 1;		/* one copy wanted */
 					if ('*' == *input_p) { /* multiple copies wanted */
 						input_p ++;	/* adjust to point to counter */
+						inputleft --;
 						i = 0;
 						while (isdigit(*input_p)) {
 							i = i * 10 + (*input_p - '0');	/* count */
 							input_p ++;
+							inputleft --;
 						} /* while */
 
 						/* Check for error condition */
@@ -154,15 +174,19 @@ int tokenize(const char *input_p, uint8_t *output_p, int *length_p, basic_t mode
 
 					if (i > 0) {
 						/* Copy the wanted number of characters */
-						while (i) {
+						while (i && output_p < end_p) {
 							*(output_p ++) = match;
 							i --;
 						} /* while */
+						/* Check if we ran out of buffer space */
+						if (i)
+							goto toolong;
 						
 						/* Input should now point to the } end delimeter,
 						 * skip this
 						 */
 						input_p ++;
+						inputleft --;
 					} /* if */
 				} /* if */
 				else {
@@ -406,8 +430,25 @@ skiptokenize:
 			} /* else */
 		} /* else */
 	} /* while */
-	
+	/* Verify that we have space left for the trailing 0 */
+	if (inputleft || output_p == end_p)
+		goto toolong;
+
 	*output_p = 0;				/* end bytestream with a 0 */
 	*length_p = output_p - start_p + 1;	/* tokenized stream length */
 	return rc;					/* return errorcode */
+
+toolong:
+	/* We ran out of buffer space */
+	if (inputleft) {
+		fprintf(stderr, "* Line too long in input: %c (%hu) at line %u\n",
+		        *input_p, (unsigned short) *input_p, linenumber);
+	} else {
+		fprintf(stderr, "* Line too long at line %u\n",
+		        linenumber);
+	}
+	/* Terminate the line */
+	*(end_p - 1) = 0;
+	*length_p = 255;
+	return 1;
 }
