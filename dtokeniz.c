@@ -157,7 +157,7 @@ int detokenize(const uint8_t *input_p, ptrdiff_t len, FILE *output, basic_t mode
 					/* VIC-20 Super Expander */
 					fprintf(output, "%s", supertokens[*ch_p - 204]);
 				}
-				else if (*ch_p <= 254 && Graphics52 == mode) {
+				else if (*ch_p <= 253 && Graphics52 == mode) {
 					/* C64 Graphics52 */
 					fprintf(output, "%s", graphics52tokens[*ch_p - 204]);
 				} /* else */
