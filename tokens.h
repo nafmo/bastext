@@ -27,7 +27,7 @@ extern const char *basic4tokens[];
  */
 extern const char *supertokens[];
 
-/* Commander X16 BASIC (r48)
+/* Commander X16 BASIC (r49)
  */
 extern const char *x16tokens[];
 

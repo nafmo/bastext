@@ -386,7 +386,7 @@ const char *supertokens[] = {
 	"RDOT"				/* 221 */	/* 0xDD */
 };
 
-/* Commander X16 CE tokens (r48)
+/* Commander X16 CE tokens (r49)
  * offset: 128 (0x80)
  * Based on basic/tok2en2.s from https://github.com/X16Community/x16-rom/
  */
@@ -487,7 +487,8 @@ const char *x16tokens[]={
 	"RPT$",		/* 0xCE 0xDA */
 	"MWHEEL",	/* 0xCE 0xDB */
 	"TDATA",	/* 0xCE 0xDC */
-	"TATTR"		/* 0xCE 0xDD */
+	"TATTR",	/* 0xCE 0xDD */
+	"MOD",		/* 0xCE 0xDE */
 };
 
 /* petscii conversion tables

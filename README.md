@@ -250,6 +250,8 @@ HISTORY
   Fix missing mapping for "purple".
   Fix missing support for "POINTER" in BASIC 7.0 mode.
   Port to Microsoft Visual C and start updating to modern C.
+* v1.3 - unreleased -
+  Update Commander X16 BASIC tokens to r49.
 
 BUILDING
 --------

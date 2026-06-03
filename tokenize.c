@@ -204,9 +204,9 @@ int tokenize(const char *input_p, uint8_t *output_p, int *length_p, basic_t mode
 				} /* if */
 			} /* for */
 
-			/* X16 BASIC (r48)*/
+			/* X16 BASIC (r49)*/
 			if (!match && (X16 == mode)) {
-				for (i = 0; i <= 93 && !match; i ++) {
+				for (i = 0; i <= 94 && !match; i ++) {
 					tokenlen = strlen(x16tokens[i]);	/* as above */
 					if (tokenlen && inputleft >= tokenlen &&
 					    0 == strncasecmp(input_p, x16tokens[i], tokenlen)) {
