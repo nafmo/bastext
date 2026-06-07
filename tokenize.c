@@ -91,7 +91,7 @@ int tokenize(const char *input_p, uint8_t output_p[255], int *length_p, basic_t 
 			i = 0;				/* buffer position counter */
 			input_p ++;			/* position at first character of name */
 			inputleft --;
-			while (i < 16 && *input_p != '*' && *input_p != '}' && *input_p) {
+			while (i < 15 && *input_p != '*' && *input_p != '}' && *input_p) {
 				/* terminate loop on:
 				 *  . buffer size overrun (error)
 				 *  . '*' in input stream
