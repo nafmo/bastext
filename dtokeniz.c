@@ -39,6 +39,11 @@ int detokenize(const uint8_t *input_p, ptrdiff_t len, FILE *output, basic_t mode
 	ch_p = input_p;
 	end_p = input_p + len - 1; /* point to trailing null character */
 
+	/* BASIC lines always end with a null character */
+	if (*end_p != 0) {
+		return 1;
+	}
+
 	/* First two bytes is the line number as (low,high) */
 	linenumber = (*ch_p) | (*(ch_p + 1)) << 8;
 	ch_p += 2;
@@ -57,7 +62,11 @@ int detokenize(const uint8_t *input_p, ptrdiff_t len, FILE *output, basic_t mode
 		}
 
 		/* Process token */
-		if (quotemode) {		/* quoted string? */
+		if (!*ch_p) {
+			/* A BASIC line cannot contain a nul character */
+			rc = 1;
+		} /* if */
+		else if (quotemode) {		/* quoted string? */
 			/* Convert from PETSCII to ASCII,
 			 * and write repetitions as a multiple of the character.
 			 * Repetitions of non-special characters is only written if
@@ -203,11 +212,5 @@ int detokenize(const uint8_t *input_p, ptrdiff_t len, FILE *output, basic_t mode
 	} /* while */
 
 	fputc('\n', output);
-
-	/* BASIC lines always end with a null character */
-	if (*ch_p != 0) {
-		rc = 1;
-	}
-
 	return rc;
 }
