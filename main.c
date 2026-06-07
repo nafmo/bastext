@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 	 *    -b 4.0   - BASIC 4.0
 	 *    -b 7.0   - BASIC 7.0  (legacy: -7)
 	 *    -b 7.1   - BASIC 7.1  (legacy: -1)
-	 *    -b 52    - Graphics53 (legacy: -5)
+	 *    -b 52    - Graphics52 (legacy: -5)
 	 *    -b TFC3  - TFC 3      (legacy: -3)
 	 *    -b X16   - X16 BASIC
 	 *    -b Super - VIC-20 SuperExpander
