@@ -304,10 +304,12 @@ void from_petscii_name(char title[21], char petscii_filename[16])
 	memcpy(title, petscii_filename, 16);
 	title[16] = 0;		/* null terminate */
 
-	while ((char) 32 == title[strlen(title) - 1] ||
-	       (char) 160 == title[strlen(title) - 1]) {
-		/* Remove trailing spaces */
-		title[strlen(title) - 1] = 0;
+	if (title[0]) {
+		while ((char) 32 == title[strlen(title) - 1] ||
+		       (char) 160 == title[strlen(title) - 1]) {
+			/* Remove trailing spaces */
+			title[strlen(title) - 1] = 0;
+		}
 	}
 
 	/* Convert to uppercase ASCII, and change spaces to underscores */
