@@ -35,7 +35,7 @@ void bas2txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 {
 	FILE		*input;
 	const char	*title_p;
-	char        title_buf[17];
+	char		title_buf[21];
 	int			adr;
 
 	/* First, open input file */
@@ -65,6 +65,8 @@ void bas2txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 	/* Check for P00 file signature - "C64File\0" */
 	if (0x3643 == adr)
 	{
+		char	buf[16];
+
 		if (fgetc(input) != '4' ||
 		    fgetc(input) != 'F' ||
 		    fgetc(input) != 'i' ||
@@ -78,8 +80,9 @@ void bas2txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 		}
 
 		/* Read the PETSCII file name and point to it */
-		memset(title_buf, 0, sizeof(title_buf));
-		fread(title_buf, 1, 16, input);
+		memset(buf, 0, sizeof(buf));
+		fread(buf, 1, 16, input);
+		from_petscii_name(title_buf, buf);
 		title_p = title_buf;
 
 		/* Ignore nul and REL metadata */
