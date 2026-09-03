@@ -107,7 +107,7 @@ void txt2bas(const char *infile, basic_t force, outmode_t outmode)
 		/* Locate the bastext/tok64 headers */
 		foundextraheader = false;
 		foundheader = false;
-		while (!foundheader && NULL != fgets(text, sizeof(text), input)) {
+		while (!foundheader && NULL != fgets(text, sizeof(text), input) && text[0]) {
 			/* Remove the trailing newline marker that fgets stuck there */
 			text[sizeof(text) - 1] = 0;		/* if buffer was full */
 			text[strlen(text) - 1] = 0;		/* overwrite newline */
@@ -311,7 +311,7 @@ int outconvert(FILE *input, FILE *output, int adr, basic_t mode)
 	/* Read the file until we either find a "stop tok64/tok128" footer,
 	 * or get to the end-of-file marker
 	 */
-	while (goon && NULL != fgets(text, sizeof(text), input)) {
+	while (goon && NULL != fgets(text, sizeof(text), input) && text[0]) {
 		/* Remove the trailing newline marker that fgets stuck there */
 		text[sizeof(text) - 1] = 0;		/* if buffer was full */
 		text[strlen(text) - 1] = 0;		/* overwrite newline */
