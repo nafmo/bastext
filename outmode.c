@@ -112,6 +112,11 @@ void txt2bas(const char *infile, basic_t force, outmode_t outmode)
 			text[sizeof(text) - 1] = 0;		/* if buffer was full */
 			text[strlen(text) - 1] = 0;		/* overwrite newline */
 
+			/* Ignore empty lines */
+			if (!text[0]) {
+				continue;
+			}
+
 			/* Check for trailing CR (when reading DOS text files under Unix) */
 			if ('\r' == text[strlen(text) - 1]) {
 				text[strlen(text) - 1] = 0;
@@ -317,8 +322,13 @@ int outconvert(FILE *input, FILE *output, int adr, basic_t mode)
 		text[strlen(text) - 1] = 0;		/* overwrite newline */
 
 		/* Check for trailing CR (when reading DOS text files under Unix) */
-		if ('\r' == text[strlen(text) - 1]) {
+		if (text[0] && '\r' == text[strlen(text) - 1]) {
 			text[strlen(text) - 1] = 0;
+		}
+
+		/* Ignore empty lines */
+		if (!text[0]) {
+			continue;
 		}
 
 		/* Check for trailing backslash (line continuation) */
@@ -334,10 +344,12 @@ int outconvert(FILE *input, FILE *output, int adr, basic_t mode)
 
 			/* Remove the trailing newline marker that fgets stuck there */
 			buf[sizeof(buf) - 1] = 0;		/* if buffer was full */
-			buf[strlen(buf) - 1] = 0;		/* overwrite newline */
+			if (text[0]) {
+				buf[strlen(buf) - 1] = 0;	/* overwrite newline */
+			}
 
 			/* Check for trailing CR (when reading DOS text files under Unix) */
-			if ('\r' == buf[strlen(buf) - 1]) {
+			if (text[0] && '\r' == buf[strlen(buf) - 1]) {
 				buf[strlen(buf) - 1] = 0;
 			}
 
