@@ -772,3 +772,15 @@ bool nontok64compatible(int petscii)
 	        || (petscii >= 219 && petscii <= 221)
 	        || 223 == petscii);
 }
+
+/* petscii_isalpha
+ * - checks whether a PETSCII code is a letter A-Z in either lower or
+ *   upper case
+ * in:	petscii - petscii character value
+ * out:	true / false
+ */
+bool petscii_isalpha(int petscii)
+{
+	return    (petscii >= 65  && petscii <= 90)
+	       || (petscii >= 193 && petscii <= 218);
+}

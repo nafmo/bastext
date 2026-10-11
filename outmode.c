@@ -19,7 +19,7 @@
 #define strncasecmp _strnicmp
 #endif
 
-int outconvert(FILE *, FILE *, int, basic_t);
+int outconvert(FILE *, FILE *, int, basic_t, bool);
 void make_petscii_name(char petscii_filename[16], const char *filename, char filler);
 
 /* txt2bas
@@ -27,9 +27,10 @@ void make_petscii_name(char petscii_filename[16], const char *filename, char fil
  * in:	infile - file name of file to read
  *		force - flag for forcing a BASIC mode (Any for autodetect)
  *		outmode - flag for putting the files in a T64 or P00 container
+ *		uppercase - flag for intepreting text strings in uppercase/graphics mode
  * out:	none
  */
-void txt2bas(const char *infile, basic_t force, outmode_t outmode)
+void txt2bas(const char *infile, basic_t force, outmode_t outmode, bool uppercase)
 {
 	FILE			*input, *output;
 	int				adr;
@@ -256,7 +257,7 @@ void txt2bas(const char *infile, basic_t force, outmode_t outmode)
 			}
 
 			/* Now convert the file to text */
-			adr = outconvert(input, output, adr, mode);
+			adr = outconvert(input, output, adr, mode, uppercase);
 
 			if (T64 == outmode) {
 				/* Finish the T64 record (we now know the ending address)
@@ -304,9 +305,10 @@ void txt2bas(const char *infile, basic_t force, outmode_t outmode)
  * 		output - open file, to write to
  *		adr - address to BASIC start
  *		mode - BASIC version to tokenize
+ *      uppercase - flag for intepreting text strings in uppercase/graphics mode
  * out:	last address of file
  */
-int outconvert(FILE *input, FILE *output, int adr, basic_t mode)
+int outconvert(FILE *input, FILE *output, int adr, basic_t mode, bool uppercase)
 {
 	char		text[512];
 	bool		goon = true;
@@ -374,7 +376,7 @@ int outconvert(FILE *input, FILE *output, int adr, basic_t mode)
 			uint8_t		buf[255];
 
 			/* Tokenize */
-			if (tokenize(text, buf, &linelength, mode)) {
+			if (tokenize(text, buf, &linelength, mode, uppercase)) {
 				errors ++;		/* error if nonzero */
 			}
 
@@ -393,7 +395,7 @@ int outconvert(FILE *input, FILE *output, int adr, basic_t mode)
 		uint8_t		buf[255];
 
 		sprintf(text, "63999 REM\"%u errors in tokenization", errors);
-		tokenize(text, buf, &linelength, mode);
+		tokenize(text, buf, &linelength, mode, false);
 
 		/* Write tokenized line to program */
 		adr += linelength + 2;

@@ -34,3 +34,4 @@ extern const char *x16tokens[];
 /* PETSCII */
 extern const char *petscii[];
 bool nontok64compatible(int petscii);
+bool petscii_isalpha(int petscii);

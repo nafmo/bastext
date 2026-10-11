@@ -29,9 +29,10 @@
  *		output_p - pointer to bytestream to put results in, MUST BE ALLOCATED
  *		length_p - pointer to integer to write length counter to
  *      mode - BASIC version to tokenize
+ *      uppercase - flag for intepreting text strings in uppercase/graphics mode
  * out:	nonzero on error
  */
-int tokenize(const char *input_p, uint8_t output_p[255], int *length_p, basic_t mode)
+int tokenize(const char *input_p, uint8_t output_p[255], int *length_p, basic_t mode, bool uppercase)
 {
 	bool quotemode = false;		/* flag for quote mode */
 	unsigned short i;			/* loop counter */
@@ -123,7 +124,7 @@ int tokenize(const char *input_p, uint8_t output_p[255], int *length_p, basic_t 
 
 				/* Look it up in the PETSCII table */
 				for (i = 1; i <= 255 && !match; i ++) {
-					if ((i & 0x7f) >= 0x41 && (i & 0x7f) <= 0x5A) {
+					if (!uppercase && (i & 0x7f) >= 0x41 && (i & 0x7f) <= 0x5A) {
 						/* Upper-/lowercase PETSCII must be matched with
 						 * case also (otherwise 'e' would match 'E')
 						 */
@@ -143,6 +144,23 @@ int tokenize(const char *input_p, uint8_t output_p[255], int *length_p, basic_t 
 
 				if (!match && 0 == strcasecmp("space", buf)) {
 					match = ' ';
+				} /* if */
+
+				/* In uppercase mode, synthesize shifted characters */
+				if (!match && uppercase && strlen(buf) == 4 && buf[2] == ' ') {
+					buf[2] = 0;
+					if (0 == strcasecmp(buf, "sh")) {
+						if (buf[3] >= 'a' && buf[3] <= 'z') {
+							match = buf[3] - 'a' + 193;
+						} /* if */
+						else if (buf[3] >= 'A' && buf[3] <= 'Z') {
+							match = buf[3] - 'A' + 193;
+						} /* else */
+						else {
+							/* Restore buffer for error output */
+							buf[2] = ' ';
+						} /* else */
+					} /* if */
 				} /* if */
 
 				/* Now check whether or not we got a match */
@@ -400,6 +418,9 @@ skiptokenize:
 			 *     lowercase ASCII   (97-122) on lowercase PETSCII  (65-90)
 			 *     other specials  (91,93,94) on themselves
 			 * other characters should not be there
+			 *
+			 * in uppercase mode, map uppercase ASCII (65-90) to themselves,
+			 * and disallow lowercase ASCII (97-122).
 			 */
 			if ((*input_p >= 32 && *input_p <= 64) ||
 			    (91 == *input_p || 93 == *input_p || 94 == *input_p)) {
@@ -411,11 +432,16 @@ skiptokenize:
 				inputleft --;
 			} /* if */
 			else if (*input_p >= 65 && *input_p <= 90) {
-				*(output_p ++) = *input_p | 128;
+				if (uppercase) {
+					*(output_p ++) = *input_p;
+				} /* if */
+				else {
+					*(output_p ++) = *input_p | 128;
+				} /* else */
 				input_p ++;
 				inputleft --;
 			} /* if */
-			else if (*input_p >= 97 && *input_p <= 122) {
+			else if (!uppercase && *input_p >= 97 && *input_p <= 122) {
 				*(output_p ++) = *input_p & (~32);
 				input_p ++;
 				inputleft --;

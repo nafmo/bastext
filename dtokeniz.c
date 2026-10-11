@@ -21,9 +21,10 @@
  *		output - File to write the result to
  *      mode - BASIC version to detokenize
  *		strict - flag for using strict tok64 compatibility
+ *      uppercase - flag for intepreting text strings in uppercase/graphics mode
  * out:	nonzero on error
  */
-int detokenize(const uint8_t *input_p, ptrdiff_t len, FILE *output, basic_t mode, int strict)
+int detokenize(const uint8_t *input_p, ptrdiff_t len, FILE *output, basic_t mode, bool strict, bool uppercase)
 {
 	bool quotemode = false;		/* flag for quote mode */
 	unsigned short i;			/* loop counter */
@@ -33,8 +34,7 @@ int detokenize(const uint8_t *input_p, ptrdiff_t len, FILE *output, basic_t mode
 	const uint8_t *ch_p;		/* pointer moving over input */
 	const uint8_t *end_p;		/* pointer to past the end of input */
 	const char *escape_p;		/* pointer to current escape sequence */
-	char numeric[4];			/* threedigit numeric escape for strict tok64
-								   compatibility */
+	char special[5];			/* buffer for constructing special escape codes */
 
 	ch_p = input_p;
 	end_p = input_p + len - 1; /* point to trailing null character */
@@ -57,9 +57,19 @@ int detokenize(const uint8_t *input_p, ptrdiff_t len, FILE *output, basic_t mode
 		escape_p = petscii[*ch_p];
 		if (strict && nontok64compatible(*ch_p)) {
 			/* Maintain tok64 compatibility */
-			sprintf(numeric, "%03d", (int) *ch_p);
-			escape_p = numeric;
+			sprintf(special, "%03d", (int) *ch_p);
+			escape_p = special;
 		}
+		if (uppercase && petscii_isalpha(*ch_p)) {
+			/* Uppercase and shifted characers */
+			if (*ch_p & 0x80) {
+				sprintf(special, "sh %c", *ch_p - 128 + 32);
+				escape_p = special;
+			} /* if */
+			else {
+				escape_p = petscii[*ch_p + 128];
+			} /* else */
+		} /* if */
 
 		/* Process token */
 		if (!*ch_p) {
@@ -200,7 +210,12 @@ int detokenize(const uint8_t *input_p, ptrdiff_t len, FILE *output, basic_t mode
 					} /* if */
 				} /* if */
 				else if (*ch_p >= 65 && *ch_p <= 90) {	/* 'A' - 'Z' */
-					fputc(tolower(*ch_p), output);
+					if (uppercase) {
+						fputc(*ch_p, output);
+					} /* if */
+					else {
+						fputc(tolower(*ch_p), output);
+					} /* else */
 				} /* else */
 				else {	/* Possibly illegal character, write petscii escape */
 					fprintf(output, "{%s}", escape_p);

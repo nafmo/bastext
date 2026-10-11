@@ -20,7 +20,7 @@
 #include "t64.h"
 #include "d64.h"
 
-void inconvert(FILE *, FILE *, const char *, int, bool, bool, basic_t);
+void inconvert(FILE *, FILE *, const char *, int, bool, bool, basic_t, bool);
 void from_petscii_name(char title[21], char petscii_filename[16]);
 
 /* bas2txt
@@ -29,9 +29,10 @@ void from_petscii_name(char title[21], char petscii_filename[16]);
  *		allfiles - flag whether or not to convert "non-BASIC" files
  *		strict - flag for using strict tok64 compatibility
  *      force - enforced BASIC mode (X16 or VicSuper)
+ *      uppercase - flag for intepreting text strings in uppercase/graphics mode
  * out:	none
  */
-void bas2txt(const char *infile, FILE *output, bool allfiles, bool strict, basic_t force)
+void bas2txt(const char *infile, FILE *output, bool allfiles, bool strict, basic_t force, bool uppercase)
 {
 	FILE		*input;
 	const char	*title_p;
@@ -96,13 +97,13 @@ void bas2txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 	}
 
 	/* Now convert the file to text */
-	inconvert(input, output, title_p, adr, allfiles, strict, force);
+	inconvert(input, output, title_p, adr, allfiles, strict, force, uppercase);
 
 	/* Close files */
 	fclose(input);
 }
 
-void t642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic_t force)
+void t642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic_t force, bool uppercase)
 {
 	FILE			*input;
 	char			title[21];
@@ -151,7 +152,7 @@ void t642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 
 			/* Now convert the file to text */
 			fprintf(stderr, "Converting: %s\n", title);
-			inconvert(input, output, title, adr, allfiles, strict, force);
+			inconvert(input, output, title, adr, allfiles, strict, force, uppercase);
 		}
 	}
 
@@ -159,7 +160,7 @@ void t642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 	fclose(input);
 }
 
-void d642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic_t force)
+void d642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic_t force, bool uppercase)
 {
 	FILE			*input, *prgfile;
 	uint8_t			sector;
@@ -274,7 +275,7 @@ void d642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 					adr |= fgetc(prgfile) << 8;	/* high byte */
 
 					/* Now convert the file to text */
-					inconvert(prgfile, output, title, adr, allfiles, strict, force);
+					inconvert(prgfile, output, title, adr, allfiles, strict, force, uppercase);
 				}
 
 				/* Closing the temporary files deletes it */
@@ -341,10 +342,11 @@ void from_petscii_name(char title[21], char petscii_filename[16])
  *		allfiles - flag whether or not to convert "non-BASIC" files
  *      strict - output in strict tok64 compatible mode
  *      force - enforced BASIC mode (X16 or VicSuper)
+ *      uppercase - flag for intepreting text strings in uppercase/graphics mode
  * out:	none
  */
 void inconvert(FILE *input, FILE *output, const char *title, int adr,
-               bool allfiles, bool strict, basic_t force)
+               bool allfiles, bool strict, basic_t force, bool uppercase)
 {
 	int		nextadr;
 	bool	valid;
@@ -423,7 +425,7 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
 			adr = nextadr;
 
 			/* Convert to text */
-			if (detokenize(buf, len, output, mode, strict) != 0) {
+			if (detokenize(buf, len, output, mode, strict, uppercase) != 0) {
 				valid = false;
 			}
 

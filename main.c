@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
 	bool		allfiles = false;
 	outmode_t	outmode = Prg;
 	bool		strict = false;
+	bool		uppercase = false;
 	runmode_t	mode = None;
 	basic_t		force = Any;
 	char		*outfile = "-";
@@ -69,9 +70,10 @@ int main(int argc, char *argv[])
 	 *               address (0401/0801/1001/1201/132D/1C01/4001)
 	 *  s (strict) - strict tok64 encoding
 	 *  d (dest)   - destination filename
+	 *  u (upper)  - use uppercase mode for text
 	 *  ? (help)
 	 */
-	while (-1 != (option = getopt(argc, argv, "iohf:b:asd:t23571?"))) {
+	while (-1 != (option = getopt(argc, argv, "iohf:b:asd:ut23571?"))) {
 		switch (option) {
 			case 'i':
 				mode = In;
@@ -146,6 +148,10 @@ int main(int argc, char *argv[])
 				outfile = optarg;
 				break;
 
+			case 'u':
+				uppercase = true;
+				break;
+
 			case 'h':
 			case '?':
 			case ':':
@@ -200,21 +206,21 @@ int main(int argc, char *argv[])
 			case In:
 				switch (outmode) {
 					case T64:
-						t642txt(argv[i], output, allfiles, strict, force);
+						t642txt(argv[i], output, allfiles, strict, force, uppercase);
 						break;
 
 					case D64:
-						d642txt(argv[i], output, allfiles, strict, force);
+						d642txt(argv[i], output, allfiles, strict, force, uppercase);
 						break;
 
 					default:
-						bas2txt(argv[i], output, allfiles, strict, force);
+						bas2txt(argv[i], output, allfiles, strict, force, uppercase);
 						break;
 				}
 				break;
 
 			case Out:
-				txt2bas(argv[i], force, outmode);
+				txt2bas(argv[i], force, outmode, uppercase);
 				break;
 
 		case None:
@@ -255,7 +261,8 @@ void helpscreen(const char *progname)
 	        "  " SWITCH "a\tConvert all, not just recognized start addresses\n"
 	        "    \t (0401/0801/1001/1201/132D/1C01/4001)\n"
 	        "  " SWITCH "s\tStrict tok64 compatibility\n"
-	        "  " SWITCH "d fn\tSend output to file fn\n",
+	        "  " SWITCH "d fn\tSend output to file fn\n"
+	        "  " SWITCH "u\tUse upper case for strings\n",
 	        progname,
 	        progname);
 }

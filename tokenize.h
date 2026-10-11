@@ -1,4 +1,5 @@
 #pragma once
+#include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
 
@@ -7,5 +8,5 @@ typedef enum basic_e {
 	Any, Basic2, Graphics52, TFC3, Basic7, Basic71, Basic35, Basic4, VicSuper, X16
 } basic_t;
 
-int tokenize(const char *input_p, uint8_t output_p[255], int *length_p, basic_t mode);
-int detokenize(const uint8_t *input_p, ptrdiff_t len, FILE *output, basic_t mode, int strict);
+int tokenize(const char *input_p, uint8_t output_p[255], int *length_p, basic_t mode, bool uppercase);
+int detokenize(const uint8_t *input_p, ptrdiff_t len, FILE *output, basic_t mode, bool strict, bool uppercase);
