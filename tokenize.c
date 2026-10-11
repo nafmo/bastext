@@ -212,6 +212,8 @@ int tokenize(const char *input_p, uint8_t output_p[255], int *length_p, basic_t 
 					fprintf(stderr, "* Illegal special character: {%s} at "
 					                "line %u\n",
 					        buf, linenumber);
+					input_p ++;
+					inputleft --;
 				} /* else */
 			} /* else */
 		} /* if */
@@ -408,6 +410,7 @@ skiptokenize:
 					                "%c (%hu) at line %u\n",
 					        *input_p, (unsigned short) *input_p, linenumber);
 					input_p ++;
+					inputleft --;
 					rc = 1;
 				} /* else */
 			} /* if */
@@ -452,6 +455,7 @@ skiptokenize:
 				                "%c (%hu) at line %u\n",
 				        *input_p, (unsigned short) *input_p, linenumber);
 				input_p ++;
+				inputleft --;
 				rc = 1;
 			} /* else */
 		} /* else */
