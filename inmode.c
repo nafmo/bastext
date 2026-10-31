@@ -19,8 +19,11 @@
 #include "select.h"
 #include "t64.h"
 #include "d64.h"
+#include "p00.h"
 
-void inconvert(FILE *, FILE *, const char *, int, bool, bool, basic_t, bool);
+#define BUFLEN 65535
+
+void inconvert(uint8_t *, size_t, FILE *, const char *, int, bool, bool, basic_t, bool);
 void from_petscii_name(char title[21], char petscii_filename[16]);
 
 /* bas2txt
@@ -37,6 +40,8 @@ void bas2txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 	FILE		*input;
 	const char	*title_p;
 	char		title_buf[21];
+	uint8_t		*buf, *p;
+	size_t      len;
 	int			adr;
 
 	/* First, open input file */
@@ -46,61 +51,50 @@ void bas2txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 		exit(1);
 	}
 
-	/* Name to print in header is the last part of the file name */
-#ifdef __EMX__
-	title_p = strrchr(infile, '\\');
-#else
-	title_p = strrchr(infile, '/');
-#endif
-	if (title_p) {	/* Found, make pointer point past the slash */
-		title_p ++;
+	/* Read the entire file into a buffer */
+	buf = (uint8_t *) malloc(BUFLEN);
+	len = fread(buf, 1, BUFLEN, input);
+
+	/* Check for P00 file signature - "C64File\0" */
+	if (len > sizeof (p00header_t) + 2 &&
+	    0 == ((p00header_t *) buf)->description[7] &&
+	    0 == strcmp(((p00header_t *) buf)->description, "C64File")) {
+		/* Read the PETSCII file name and point to it */
+		from_petscii_name(title_buf, ((p00header_t *) buf)->filename);
+		title_p = title_buf;
+
+		/* The start address is after the file header; point to there */
+		p = buf + sizeof (p00header_t);
+		len -= sizeof (p00header_t);
 	}
-	else {	/* Not found, point to the whole file name */
-		title_p = infile;
+	else {
+		/* Name to print in header is the last part of the file name */
+#ifdef __EMX__
+		title_p = strrchr(infile, '\\');
+#else
+		title_p = strrchr(infile, '/');
+#endif
+		if (title_p) {	/* Found, make pointer point past the slash */
+			title_p ++;
+		}
+		else {	/* Not found, point to the whole file name */
+			title_p = infile;
+		}
+
+		/* The entire file is data */
+		p = buf;
 	}
 
 	/* First read the start address */
-	adr = fgetc(input);			/* low byte */
-	adr |= fgetc(input) << 8;	/* high byte */
-
-	/* Check for P00 file signature - "C64File\0" */
-	if (0x3643 == adr)
-	{
-		char	buf[16];
-
-		if (fgetc(input) != '4' ||
-		    fgetc(input) != 'F' ||
-		    fgetc(input) != 'i' ||
-		    fgetc(input) != 'l' ||
-		    fgetc(input) != 'e' ||
-		    fgetc(input) != 0)
-		{
-			/* It wasn't -> panic */
-			fprintf(stderr, "Unable to identify file header: %s\n", infile);
-			exit(1);
-		}
-
-		/* Read the PETSCII file name and point to it */
-		memset(buf, 0, sizeof(buf));
-		fread(buf, 1, 16, input);
-		from_petscii_name(title_buf, buf);
-		title_p = title_buf;
-
-		/* Ignore nul and REL metadata */
-		fgetc(input);
-		fgetc(input);
-
-		/* The file pointer now points to actual data; get the actual start
-		 * address  */
-		adr = fgetc(input);			/* low byte */
-		adr |= fgetc(input) << 8;	/* high byte */
-	}
+	adr = *(p ++);			/* low byte */
+	adr |= *(p ++) << 8;	/* high byte */
 
 	/* Now convert the file to text */
-	inconvert(input, output, title_p, adr, allfiles, strict, force, uppercase);
+	inconvert(p, len - 2, output, title_p, adr, allfiles, strict, force, uppercase);
 
-	/* Close files */
+	/* Close files and return memory */
 	fclose(input);
+	free(buf);
 }
 
 void t642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic_t force, bool uppercase)
@@ -110,8 +104,9 @@ void t642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 	t64header_t		header;
 	t64record_t		record;
 	unsigned int	totalentries, usedentries;
-	int				adr;
+	int				adr, end;
 	long			fptr;
+	uint8_t			*buf;
 
 	/* First, open input file */
 	input = fopen(infile, "rb");
@@ -129,6 +124,14 @@ void t642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 		exit(1);
 	}
 
+	/* Allocate a temporary buffer to store the program in.
+	 *
+	 * To avoid having to allocate a new buffer for each entry, we allocate
+	 * a global buffer. These machines cannot possibly have BASIC files
+	 * larger than 64K, so let's allocate that.
+	 */
+	buf = malloc(BUFLEN);
+
 	/* Cycle through the entries */
 	for (unsigned int i = 0; i < usedentries; i ++) {
 		/* Seek to the directory entry and read it */
@@ -142,33 +145,37 @@ void t642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 			/* Get the file title */
 			from_petscii_name(title, record.filename);
 
-			/* Retrieve the starting address */
+			/* Retrieve the starting and ending address */
 			adr = record.startaddress[0] | (record.startaddress[1] << 8);
+			end = record.endaddress[0]   | (record.endaddress[1] << 8);
 
 			/* Position file pointer to the start of data */
 			fptr = (record.offset[0]      ) | (record.offset[1] << 8 ) |
 			       (record.offset[2] << 16) | (record.offset[3] << 24);
 			fseek(input, fptr, SEEK_SET);
 
+			/* Read the entire file into a buffer */
+			fread(buf, end - adr, 1, input);
+
 			/* Now convert the file to text */
 			fprintf(stderr, "Converting: %s\n", title);
-			inconvert(input, output, title, adr, allfiles, strict, force, uppercase);
+			inconvert(buf, end - adr, output, title, adr, allfiles, strict, force, uppercase);
 		}
 	}
 
-	/* Close files */
+	/* Close files and return memory */
 	fclose(input);
+	free(buf);
 }
 
 void d642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic_t force, bool uppercase)
 {
-	FILE			*input, *prgfile;
+	FILE			*input;
 	uint8_t			sector;
 	bam_t			bam;
 	dirblock_t		dirblock;
 	char			title[21];
-	char			tmpfilename[14];
-	uint8_t			buf[256];       /* One disk sector */
+	uint8_t			*buf, *end;
 
 	/* First, open input file */
 	input = opend64(infile, &bam);
@@ -176,6 +183,14 @@ void d642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 		fprintf(stderr, "Unable to open input file: %s\n", infile);
 		exit(1);
 	}
+
+	/* Allocate a temporary buffer to store the program in.
+	 *
+	 * To avoid having to allocate a new buffer for each entry, we allocate
+	 * a global buffer. These machines cannot possibly have BASIC files
+	 * larger than 64K, so let's allocate that.
+	 */
+	buf = malloc(BUFLEN);
 
 	/* Read the directory; we ignore the BAM completely */
 	sector = 1;
@@ -188,7 +203,7 @@ void d642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 		for (size_t i = 0; i < 8; ++ i) {
 			if ((dirblock.file[i].filetype & (D64_CLO | D64_FTY)) == (D64_PRG | D64_CLO)) {
 				/* This is a valid PRG file entry */
-				int				adr, fd;
+				int				adr;
 				size_t			blocks;
 				uint8_t			t, s;
 				bool			valid;
@@ -204,60 +219,29 @@ void d642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 					continue;
 				}
 
-				/* inconvert() requires a linear file. Copy the contents to a
-				 * temporary file, which we then feed it.
-				 *
-				 * While tmpfile() is portable (C11), it seems to always write
-				 * to /tmp (GNU libc) or the root directory (Microsoft), which
-				 * is *bad*.
-				 *
-				 * For GNU libc and Darwin, we kan use mkstemps(), but for
-				 * Microsoft we roll our own code.
+				/* inconvert() requires a linear file. Copy the contents to
+				 * our temporary buffer, which we then feed it.
 				 */
-#ifdef _MSC_VER
-				for (int j = 0; j < 10; ++ j) {
-					snprintf(tmpfilename, sizeof tmpfilename, "bastext%02d.tmp", j);
-					fd = _open(tmpfilename,
-					           _O_BINARY | _O_CREAT | _O_EXCL | _O_RDWR | _O_TEMPORARY,
-					           _S_IREAD | _S_IWRITE);
-					if (fd != -1) {
-						break;
-					}
-				}
-#else
-				strcpy(tmpfilename, "bastextXXXXXX");
-				fd = mkstemp(tmpfilename);
-#endif
-				if (-1 == fd) {
-					fprintf(stderr, "Unable to allocate temporary file for %s\n", title);
-					continue;
-				}
-#ifndef _MSC_VER
-				/* Make sure we do not leave the file on disk; on Microsoft,
-				 * _O_TEMPORARY removes the file on close. On real operating
-				 * systems, we call unlink() to remove the file from the
-				 * directory even earlier.
-				 */
-				unlink(tmpfilename);
-#endif
-				prgfile = fdopen(fd, "w+b");
 
 				/* Make sure loops don't kill us */
-				blocks = 664;
+				blocks = BUFLEN / 254;
 
 				/* End of file marker is track == 0 */
 				valid = true;
+				end = buf;
 				while (t && blocks --) {
 					/* Read requested sector */
 					fseek(input, ts2block(t, s) * 256, SEEK_SET);
-					fread(buf, 1, 256, input);
+					fread(end, 1, 256, input);
 
 					/* Read links */
-					t = buf[0];
-					s = buf[1]; /* length of data if t == 0 */
+					t = end[0];
+					s = end[1]; /* length of data if t == 0 */
 
-					/* Write to the temporary file */
-					fwrite(&buf[2], 1, t ? 254 : s, prgfile);
+					/* Shift the buffer two bytes, so that we only have
+					 * the program data in it */
+					memmove(end, end + 2, 254);
+					end += t ? 254 : s;
 
 					/* Check for error conditions */
 					if (t && (t == 18 || t > 35 || s > 21)) {
@@ -265,21 +249,16 @@ void d642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 						valid = false;
 						t = 0;
 					}
-
 				}
 
 				if (valid) {
-					/* Now rewind the file to read the start address */
-					fseek(prgfile, 0, SEEK_SET);
-					adr = fgetc(prgfile);		/* low byte */
-					adr |= fgetc(prgfile) << 8;	/* high byte */
+					/* Now read the start address */
+					adr = buf[0];		/* low byte */
+					adr |= buf[1] << 8;	/* high byte */
 
 					/* Now convert the file to text */
-					inconvert(prgfile, output, title, adr, allfiles, strict, force, uppercase);
+					inconvert(buf + 2, end - buf - 2, output, title, adr, allfiles, strict, force, uppercase);
 				}
-
-				/* Closing the temporary files deletes it */
-				fclose(prgfile);
 			}
 		}
 
@@ -291,6 +270,7 @@ void d642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 
 	/* Finish up */
 	fclose(input);
+	free(buf);
 }
 
 /* Copy filename from the T64, D64 or P00 record and convert
@@ -335,7 +315,8 @@ void from_petscii_name(char title[21], char petscii_filename[16])
 
 /* inconvert
  * - performs the actual conversion
- * in:	input - open file, positioned at start of BASIC program
+ * in:	input - pointer to a binary BASIC program
+ *      len - length of the program pointer to by input
  * 		output - open file, to write to
  *		title - program title to print in header
  *		adr - load address of the program
@@ -345,13 +326,15 @@ void from_petscii_name(char title[21], char petscii_filename[16])
  *      uppercase - flag for intepreting text strings in uppercase/graphics mode
  * out:	none
  */
-void inconvert(FILE *input, FILE *output, const char *title, int adr,
+void inconvert(uint8_t *input, size_t len, FILE *output, const char *title, int adr,
                bool allfiles, bool strict, basic_t force, bool uppercase)
 {
 	int		nextadr;
 	bool	valid;
-	uint8_t	buf[256];
+	uint8_t	*end;
 	basic_t	mode;
+
+	end = input + len;
 
 	/* Check for valid BASIC file */
 	if (allfiles || 0x0401 == adr || 0x0801 == adr || 0x1001 == adr ||
@@ -397,7 +380,7 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
 		 * skip over the header (0x132D - 0x1C00)
 		 */
 		if (0x132D == adr) {
-			fseek(input, 0x1C01 - 0x132D, SEEK_CUR);
+			input += 0x1C01 - 0x132D;
 			adr = 0x1C01;
 		}
 
@@ -408,11 +391,14 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
 		 *  [2-3]- line number                     \_ sent to
 		 *  [4-n]- tokenized line, null terminated /  detokenize
 		 */
-		valid = true;
 
 		/* Read address to next line */
-		nextadr = fgetc(input);			/* low byte */
-		nextadr |= fgetc(input) << 8;	/* high byte */
+		nextadr = 0xFFFF;
+		if (input < end + 2) {
+			valid = true;
+			nextadr = *(input ++);			/* low byte */
+			nextadr |= *(input ++) << 8;	/* high byte */
+		}
 
 		/* Address to next line is null when the program is ended.
 		 * Address to next line must be higher than the current address.
@@ -421,17 +407,24 @@ void inconvert(FILE *input, FILE *output, const char *title, int adr,
 		while (nextadr && nextadr > adr && nextadr - adr < 256) {
 			/* Read the line into the buffer */
 			ptrdiff_t len = nextadr - adr - 2;
-			fread(buf, len, 1, input);
-			adr = nextadr;
+			if (input + len <= end) {
+				adr = nextadr;
 
-			/* Convert to text */
-			if (detokenize(buf, len, output, mode, strict, uppercase) != 0) {
-				valid = false;
+				/* Convert to text */
+				if (detokenize(input, len, output, mode, strict, uppercase) != 0) {
+					valid = false;
+				}
 			}
 
 			/* Read address to next line */
-			nextadr = fgetc(input);			/* low byte */
-			nextadr |= fgetc(input) << 8;	/* high byte */
+			input += len;
+			if (input < end + 2) {
+				nextadr = *(input ++);			/* low byte */
+				nextadr |= *(input ++) << 8;	/* high byte */
+			}
+			else {
+				nextadr = 0xFFFF;
+			}
 		}
 		
 		/* If nextadr != null, then the program was invalid */
