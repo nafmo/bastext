@@ -19,9 +19,16 @@
 int checkvalidheader(t64header_t *header_p, unsigned int *totalentries_p,
                      unsigned int *usedentries_p, const char *filename)
 {
+	char	buf[sizeof header_p->description + 1];
+
+	/* Copy the description header and add nul terminator; memem() is
+	 * not standard C. */
+	memcpy(buf, header_p->description, sizeof header_p->description);
+	buf[sizeof header_p->description] = 0;
+
 	/* Locate the strings "C64" and "tape" in the description header */
-	if (!strstr(header_p->description, "C64") ||
-	    !strstr(header_p->description, "tape")) {
+	if (!strstr(buf, "C64") ||
+	    !strstr(buf, "tape")) {
 		fprintf(stderr, "File is not a T64 archive: %s\n", filename);
 		return 1;
 	}
