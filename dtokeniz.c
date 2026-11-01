@@ -73,8 +73,10 @@ int detokenize(const uint8_t *input_p, ptrdiff_t len, FILE *output, basic_t mode
 
 		/* Process token */
 		if (!*ch_p) {
-			/* A BASIC line cannot contain a nul character */
-			rc = 1;
+			/* A BASIC line containing a nul character can be created, but
+			 * cannot be loaded normally as the relinker thinks it is the
+			 * end of the line */
+			fprintf(output, "{%s}", escape_p);
 		} /* if */
 		else if (quotemode) {		/* quoted string? */
 			/* Convert from PETSCII to ASCII,
