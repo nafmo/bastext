@@ -293,6 +293,11 @@ void from_petscii_name(char title[21], char petscii_filename[16])
 		       (char) 160 == title[strlen(title) - 1]) {
 			/* Remove trailing spaces */
 			title[strlen(title) - 1] = 0;
+			if (!title[0]) {
+				/* The file name was empty */
+				strcat(title, "NONAME");
+				break;
+			}
 		}
 	}
 
@@ -394,7 +399,7 @@ void inconvert(uint8_t *input, size_t len, FILE *output, const char *title, int 
 
 		/* Read address to next line */
 		nextadr = 0xFFFF;
-		if (input < end + 2) {
+		if (input < end - 1) {
 			valid = true;
 			nextadr = *(input ++);			/* low byte */
 			nextadr |= *(input ++) << 8;	/* high byte */
@@ -402,11 +407,13 @@ void inconvert(uint8_t *input, size_t len, FILE *output, const char *title, int 
 
 		/* Address to next line is null when the program is ended.
 		 * Address to next line must be higher than the current address.
-		 * The line cannot be longer than 256 bytes
+		 * The line must be at least four bytes long (two bytes address
+		 * and two bytes line number), and must be less than 256 bytes.
 		 */
-		while (nextadr && nextadr > adr && nextadr - adr < 256) {
+		while (nextadr && nextadr - adr > 4 && nextadr - adr < 256) {
 			/* Read the line into the buffer */
 			ptrdiff_t len = nextadr - adr - 2;
+
 			if (input + len <= end) {
 				adr = nextadr;
 
@@ -418,7 +425,7 @@ void inconvert(uint8_t *input, size_t len, FILE *output, const char *title, int 
 
 			/* Read address to next line */
 			input += len;
-			if (input < end + 2) {
+			if (input < end - 1) {
 				nextadr = *(input ++);			/* low byte */
 				nextadr |= *(input ++) << 8;	/* high byte */
 			}
