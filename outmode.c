@@ -342,30 +342,41 @@ int outconvert(FILE *input, FILE *output, int adr, basic_t mode, bool uppercase)
 			text[strlen(text) - 1] = 0;
 
 			/* Get next line */
-			fgets(buf, sizeof(buf), input);
+			if (NULL == fgets(buf, sizeof(buf), input)) {
+				break;
+			}
 
 			/* Remove the trailing newline marker that fgets stuck there */
 			buf[sizeof(buf) - 1] = 0;		/* if buffer was full */
-			if (text[0]) {
+			if (buf[0]) {
 				buf[strlen(buf) - 1] = 0;	/* overwrite newline */
 			}
 
 			/* Check for trailing CR (when reading DOS text files under Unix) */
-			if (text[0] && '\r' == buf[strlen(buf) - 1]) {
+			if (buf[0] && '\r' == buf[strlen(buf) - 1]) {
 				buf[strlen(buf) - 1] = 0;
 			}
 
 			/* Make c_p point to first non-space character */
 			c_p = buf;
 			while (' ' == *c_p)	c_p ++;
+			if (!*c_p) {
+				/* Noting to append */
+				break;
+			}
 
 			/* If the combined line isn't too long, combine it */
 			if (strlen(text) + strlen(c_p) >= sizeof(text)) {
 				fprintf(stderr, "Line too long");
 			}
 			else {
-				strcat(text, buf);
+				strcat(text, c_p);
 			}
+		}
+
+		/* Ignore empty lines */
+		if (!text[0]) {
+			continue;
 		}
 
 		/* Check if "stop tok64/tok128" marker */
