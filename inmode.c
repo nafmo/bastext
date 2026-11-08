@@ -67,6 +67,10 @@ void bas2txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 		p = buf + sizeof (p00header_t);
 		len -= sizeof (p00header_t);
 	}
+	else if (len < 4) {
+		fprintf(stderr, "File too short: %s\n", infile);
+		exit(1);
+	}
 	else {
 		/* Name to print in header is the last part of the file name */
 #ifdef __EMX__
@@ -148,6 +152,10 @@ void t642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 			/* Retrieve the starting and ending address */
 			adr = record.startaddress[0] | (record.startaddress[1] << 8);
 			end = record.endaddress[0]   | (record.endaddress[1] << 8);
+			if (end < adr) {
+				fprintf(stderr, "Invalid entry in T64: %s\n", title);
+				continue;
+			}
 
 			/* Position file pointer to the start of data */
 			fptr = (record.offset[0]      ) | (record.offset[1] << 8 ) |
@@ -251,7 +259,7 @@ void d642txt(const char *infile, FILE *output, bool allfiles, bool strict, basic
 					}
 				}
 
-				if (valid) {
+				if (valid && end > buf + 4) {
 					/* Now read the start address */
 					adr = buf[0];		/* low byte */
 					adr |= buf[1] << 8;	/* high byte */
