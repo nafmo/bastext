@@ -198,6 +198,11 @@ Selects the filename to write the output to. If the filename is not
 given, or is given as "-", the listings will be output on the standard
 output device (normally the console).
 
+     -u
+Selects uppercase mode. In this mode, all strings are interpreted in as
+uppercase/graphics mode PETSCII. All shifted alphabetical characters are
+escaped in input mode.
+
 Please note that the MS-DOS, OS/2 versions (EMX compiled) and Windows
 versions (Visual C) uses / (slash) as parameter character.
 
@@ -251,7 +256,10 @@ HISTORY
   Fix missing support for "POINTER" in BASIC 7.0 mode.
   Port to Microsoft Visual C and start updating to modern C.
 * v1.3 - unreleased -
+  Add uppercase mode for listings.
   Update Commander X16 BASIC tokens to r49.
+  D64 reader no longer creates temporary files.
+  Fix various missing error handling.
 
 BUILDING
 --------
